@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link href="StyleSheet.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script type="text/javascript">
+    //const CSV =
+    //"D:/Documents/MATLAB/Robot/ControlTurn/turn2.csv";
+
+    function plotFromCSV(CSV) {
+      Plotly.d3.csv(CSV, function (err, rows) {
+        //console.log(rows);
+        var headerNames = Plotly.d3.keys(rows[0]);
+        console.log(headerNames);
+        addDropdown(headerNames);
+        headerNames.forEach(addCheckbox);
+        var t1 = addLine("OUTPUT", rows);
+        var t2 = addLine("ENCODERS_DIFF", rows);
+        data = [t1, t2];
+        Plotly.newPlot('plot', data);
+
+        //processData(rows);
+        window.rows = rows;
+      });
+    }
+
+    function addLine(vName, allRows) {
+      let x = [];
+      let y = [];
+
+      let row;
+      var x_axis = document.getElementById("x_axis").value;
+      /*let i = 0;
+      while (i < allRows.length) {
+          row = allRows[i];
+          x.push(row[x_axis]);  // "TIME"
+          y.push(row[vName]);
+          i += 1;
+      }*/
+      x = rows[x_axis];
+      y = rows[vName];
+      console.log(y);
+      var trace = {
+        x: x,
+        y: y,
+        name: vName,
+        type: 'scatter',
+      };
+      return trace;
+    }
+    //plotFromCSV();
+
+    // Pass the checkbox name to the function
+    function getCheckedBoxes(chkboxName) {
+      var checkboxes = document.getElementsByName(chkboxName);
+      var checkboxesChecked = [];
+      // loop over them all`
+      for (var i = 0; i < checkboxes.length; i++) {
+        // And stick the checked ones onto an array...
+        if (checkboxes[i].checked) {
+          checkboxesChecked.push(checkboxes[i]);
+        }
+      }
+      // Return the array if it is non-empty, or null
+      return checkboxesChecked.length > 0 ? checkboxesChecked : null;
+    }
+
+
+    function addDropdown(values) {
+
+      //var values = ["dog", "cat", "parrot", "rabbit"];
+
+      var select = document.createElement("select");
+      select.name = "x_axis";
+      select.id = "x_axis"
+
+      for (const val of values) {
+        var option = document.createElement("option");
+        option.value = val;
+        option.text = val.charAt(0).toUpperCase() + val.slice(1);
+        select.appendChild(option);
+      }
+
+      var label = document.createElement("label");
+      label.innerHTML = "X Axis: "
+      label.htmlFor = "x_axis";
+
+      document.getElementById("xaxis_dropdown").appendChild(label).appendChild(select);
+    }
+
+
+  </script>
+
+</head>
+
+<body>
+  <div class="sidenav" id="sidenav">
+    <h2>Amihay's Plotter</h2>
+    <input type="file" id="file-selector" multiple>
+    <div id="xaxis_dropdown"></div>
+  </div>
+  <div class="plot" id="plot">
+  </div>
+  <script>
+    //onclick='console.log("Click")'
+    const fileSelector = document.getElementById('file-selector');
+    fileSelector.addEventListener('change', (event) => {
+      const fileList = event
+        .target.files;
+      console.log(fileList);
+      for (const file of fileList) {
+        readFile(file);
+      }
+    });
+
+    function readFile(file) {
+      // Check if the file is an image.
+      //if (file.type && !file.type.startsWith('image/')) {
+      //  console.log('File is not an image.', file.type, file);
+      //  return;
+      //}
+
+      const reader = new FileReader();
+      reader.addEventListener('load', (event) => {
+        //img.src = event.target.result;
+        ttt = Plotly.d3.text(event.target.result, function (text) {
+          //var nums = [];
+          header = ["TIME", "PITCH", "ROLL", "YAW", "YAW_CALIBRATION_OFFSET", "ACCEL_X", "ACCEL_Y", "ACCEL_Z", "PWM_LEFT", "PWM_RIGHT", "ENCODER_LEFT", "DIRECTION_LEFT", "ENCODER_RIGHT", "DIRECTION_RIGHT", "CURRENT_LEFT", "CURRENT_RIGHT", "CURRENT_MF", "CURRENT_MAGNET", "SENSOR_LEFT", "SENSOR_RIGHT", "BATTERY", "GAP_DETECT"];
+
+          resultlines = text.split(/\r?\n/);
+          //nums.push(resultlines.forEach(parseLine));	
+          rows = defineObj();
+          for (var i = 0; i < resultlines.length; i++) {
+            var tLine = parseLine(resultlines[i]);
+            if (!isNaN(tLine[0])) {
+              if (tLine.length == header.length) {
+                for (var j = 0; j < header.length; j++) {
+                  rows[header[j]].push(tLine[j]);
+                }
+              }
+              //nums.push( tLine );
+            }
+          }
+          addDropdown(header);
+          header.forEach(addCheckbox);
+          var t1 = addLine("OUTPUT", rows);
+          var t2 = addLine("ENCODERS_DIFF", rows);
+          data = [t1, t2];
+          var layout = {
+            grid: {
+              rows: 2,
+              columns: 1,
+              pattern: 'coupled',
+              roworder: 'bottom to top'
+            }
+          };
+
+          Plotly.newPlot('plot', data, layout);
+
+          //processData(rows);
+          window.rows = rows;
+          //console.log(nums);
+          //return nums;
+        });
+
+
+        function defineObj() {
+
+          var obj = {};
+          header = ["TIME", "PITCH", "ROLL", "YAW", "YAW_CALIBRATION_OFFSET", "ACCEL_X", "ACCEL_Y", "ACCEL_Z", "PWM_LEFT", "PWM_RIGHT", "ENCODER_LEFT", "DIRECTION_LEFT", "ENCODER_RIGHT", "DIRECTION_RIGHT", "CURRENT_LEFT", "CURRENT_RIGHT", "CURRENT_MF", "CURRENT_MAGNET", "SENSOR_LEFT", "SENSOR_RIGHT", "BATTERY", "GAP_DETECT"];
+          for (var i = 0; i < header.length; i++) {
+            obj[header[i]] = [];
+          }
+          return obj;
+        }
+
+        function parseLine(row) {
+          //num = row.split(",").map(Number);
+          num = row.split(",");
+          //nums = row.split(",").filter(x => x.trim().length && !isNaN(x)).map(Number)
+          //console.log(nums);
+          return num;
+        }
+
+
+        //plotFromCSV(event.target.result);
+      });
+      reader.readAsDataURL(file);
+    }
+  </script>
+
+  <script>
+    function addCheckbox(colName) {
+      var cont = document.createElement('container');
+      cont.className = "container1";
+      var checkbox = document.createElement('input');
+      checkbox.type = "checkbox";
+      checkbox.id = colName;
+      checkbox.name = "signalCheckbox";
+      checkbox.onclick = sel;
+      //var span = document.createElement('span');
+      //span.className="checkmark";
+      var br = document.createElement('br');
+      var element = document.getElementById("sidenav");
+      element.appendChild(cont);
+      cont.appendChild(checkbox);
+      //cont.appendChild(span);
+      cont.appendChild(document.createTextNode(colName));
+      cont.appendChild(br);
+
+    }
+
+    function sel() {
+      var checkedBoxes = getCheckedBoxes("signalCheckbox");
+
+      console.log(checkedBoxes[0].id)
+      //var t2 = addLine(checkedBoxes[0].id, window.rows);
+      traces = [];
+      let i = 0;
+      while (i < checkedBoxes.length) {
+        traces.push(addLine(checkedBoxes[i].id, window.rows));
+        i += 1;
+      }
+      var layout = {
+        grid: {
+          rows: 2,
+          columns: 1,
+          pattern: 'coupled',
+        }
+      };
+
+      //https://plot.ly/javascript/configuration-options/
+      let config = {
+        responsive: true,
+        // staticPlot: true,
+        // editable: true
+      };
+
+      Plotly.newPlot("plot", traces, layout);
+    }
+// addCheckbox("Test")
+  </script>
+</body>
+
+</html>
