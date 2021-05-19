@@ -17,8 +17,8 @@
         console.log(headerNames);
         addDropdown(headerNames);
         headerNames.forEach(addCheckbox);
-        var t1 = addLine("OUTPUT", rows);
-        var t2 = addLine("ENCODERS_DIFF", rows);
+        var t1 = addLine("OUTPUT", 1, rows);
+        var t2 = addLine("ENCODERS_DIFF", 1, rows);
         data = [t1, t2];
         Plotly.newPlot('plot', data);
 
@@ -27,25 +27,19 @@
       });
     }
 
-    function addLine(vName, allRows) {
+    function addLine(vName, ax, allRows) {
       let x = [];
       let y = [];
 
       let row;
       var x_axis = document.getElementById("x_axis").value;
-      /*let i = 0;
-      while (i < allRows.length) {
-          row = allRows[i];
-          x.push(row[x_axis]);  // "TIME"
-          y.push(row[vName]);
-          i += 1;
-      }*/
       x = rows[x_axis];
       y = rows[vName];
       console.log(y);
       var trace = {
         x: x,
         y: y,
+        yaxis: 'y'+ax,
         name: vName,
         type: 'scatter',
       };
@@ -65,7 +59,8 @@
         }
       }
       // Return the array if it is non-empty, or null
-      return checkboxesChecked.length > 0 ? checkboxesChecked : null;
+      //return checkboxesChecked.length > 0 ? checkboxesChecked : null;
+      return checkboxesChecked;
     }
 
 
@@ -98,9 +93,10 @@
 
 <body>
   <div class="sidenav" id="sidenav">
-    <h2>Amihay's Plotter</h2>
+    <h1>Glimpse</h1>
     <input type="file" id="file-selector" multiple>
     <div id="xaxis_dropdown"></div>
+    <div class="signature" id="signature">Amihay Blau</div>
   </div>
   <div class="plot" id="plot">
   </div>
@@ -146,8 +142,8 @@
           }
           addDropdown(header);
           header.forEach(addCheckbox);
-          var t1 = addLine("OUTPUT", rows);
-          var t2 = addLine("ENCODERS_DIFF", rows);
+          var t1 = addLine("OUTPUT", 1, rows);
+          var t2 = addLine("ENCODERS_DIFF", 1, rows);
           data = [t1, t2];
           var layout = {
             grid: {
@@ -201,12 +197,20 @@
       checkbox.id = colName;
       checkbox.name = "signalCheckbox";
       checkbox.onclick = sel;
+
+      var checkbox2 = document.createElement('input');
+      checkbox2.type = "checkbox";
+      checkbox2.id = colName;
+      checkbox2.name = "signalCheckbox2";
+      checkbox2.onclick = sel;
+
       //var span = document.createElement('span');
       //span.className="checkmark";
       var br = document.createElement('br');
       var element = document.getElementById("sidenav");
       element.appendChild(cont);
       cont.appendChild(checkbox);
+      cont.appendChild(checkbox2);
       //cont.appendChild(span);
       cont.appendChild(document.createTextNode(colName));
       cont.appendChild(br);
@@ -215,21 +219,30 @@
 
     function sel() {
       var checkedBoxes = getCheckedBoxes("signalCheckbox");
+      var checkedBoxes2 = getCheckedBoxes("signalCheckbox2");
 
-      console.log(checkedBoxes[0].id)
+      //console.log(checkedBoxes2[0].id)
       //var t2 = addLine(checkedBoxes[0].id, window.rows);
       traces = [];
       let i = 0;
       while (i < checkedBoxes.length) {
-        traces.push(addLine(checkedBoxes[i].id, window.rows));
+        traces.push(addLine(checkedBoxes[i].id, 1, window.rows));
         i += 1;
       }
+
+      i = 0;
+      while (i < checkedBoxes2.length) {
+        traces.push(addLine(checkedBoxes2[i].id, 2, window.rows));
+        i += 1;
+      }
+
       var layout = {
-        /*grid: {
+        height: window.innerHeight, 
+        grid: {
           rows: 2,
           columns: 1,
           pattern: 'coupled',
-        }*/
+        }
       };
 
       //https://plot.ly/javascript/configuration-options/
