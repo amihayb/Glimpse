@@ -2,6 +2,16 @@
 <html>
 
 <head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-L09DQY6L0Z"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-L09DQY6L0Z');
+  </script>
+
   <link href="StyleSheet.css" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -39,7 +49,7 @@
       var trace = {
         x: x,
         y: y,
-        yaxis: 'y'+ax,
+        yaxis: 'y' + ax,
         name: vName,
         type: 'scatter',
       };
@@ -237,7 +247,7 @@
       }
 
       var layout = {
-        height: window.innerHeight, 
+        height: window.innerHeight,
         grid: {
           rows: 2,
           columns: 1,
