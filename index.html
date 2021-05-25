@@ -22,32 +22,13 @@
     //const CSV =
     //"D:/Documents/MATLAB/Robot/ControlTurn/turn2.csv";
 
-    function plotFromCSV(CSV) {
-      Plotly.d3.csv(CSV, function (err, rows) {
-        //console.log(rows);
-        var headerNames = Plotly.d3.keys(rows[0]);
-        console.log(headerNames);
-        addDropdown(headerNames);
-        headerNames.forEach(addCheckbox);
-        var t1 = addLine("OUTPUT", 1, rows);
-        var t2 = addLine("ENCODERS_DIFF", 1, rows);
-        data = [t1, t2];
-        Plotly.newPlot('plot', data);
-
-        //processData(rows);
-        window.rows = rows;
-      });
-    }
-
     function addLine(vName, ax, allRows) {
       let x = [];
       let y = [];
 
-      let row;
       var x_axis = document.getElementById("x_axis").value;
       x = rows[x_axis];
       y = rows[vName];
-      console.log(y);
       var trace = {
         x: x,
         y: y,
@@ -97,10 +78,7 @@
 
       document.getElementById("xaxis_dropdown").appendChild(label).appendChild(select);
     }
-
-
   </script>
-
 </head>
 
 <body>
@@ -108,7 +86,8 @@
     <h1>Glimpse</h1>
     <input type="file" id="file-selector" multiple>
     <div id="xaxis_dropdown"></div>
-    <div class="signature" id="signature">Amihay Blau</div>
+    <div class="checkboxesPlace" id="checkboxesPlace"></div>
+    <div class="signature" id="signature">by Amihay Blau</div>
   </div>
   <div class="plot" id="plot">
   </div>
@@ -155,7 +134,9 @@
             //nums.push( tLine );
             //}
           }
-          console.log(rows);
+          try {
+            cleanUp();
+          } catch (error) { };
           addDropdown(header);
           header.forEach(addCheckbox);
           var t1 = addLine("OUTPUT", 1, rows);
@@ -244,7 +225,8 @@
       //var lbl = document.createTextNode(colName);
       br.onclick = "console.log(\"click\")";
 
-      var element = document.getElementById("sidenav");
+      //var element = document.getElementById("sidenav");
+      var element = document.getElementById("checkboxesPlace");
       element.appendChild(cont);
       cont.appendChild(checkbox);
       cont.appendChild(checkbox2);
@@ -291,6 +273,15 @@
       };
 
       Plotly.newPlot("plot", traces, layout);
+    }
+
+    function cleanUp() {
+      let containers = document.getElementsByClassName("container1");
+      for (var i = containers.length - 1; i >= 0; i--) {
+        containers[i].remove();
+      };
+      c = document.getElementById("xaxis_dropdown").children;
+      c[0].remove();
     }
 // addCheckbox("Test")
   </script>
