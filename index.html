@@ -13,6 +13,8 @@
   </script>
 
   <link href="StyleSheet.css" rel="stylesheet">
+  <link rel="shortcut icon" href="images/glimpse.ico" />
+  <link rel="icon" href="images/glimpse.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -134,22 +136,26 @@
         //img.src = event.target.result;
         ttt = Plotly.d3.text(event.target.result, function (text) {
           //var nums = [];
-          header = ["TIME", "PITCH", "ROLL", "YAW", "YAW_CALIBRATION_OFFSET", "ACCEL_X", "ACCEL_Y", "ACCEL_Z", "PWM_LEFT", "PWM_RIGHT", "ENCODER_LEFT", "DIRECTION_LEFT", "ENCODER_RIGHT", "DIRECTION_RIGHT", "CURRENT_LEFT", "CURRENT_RIGHT", "CURRENT_MF", "CURRENT_MAGNET", "SENSOR_LEFT", "SENSOR_RIGHT", "BATTERY", "GAP_DETECT"];
 
           resultlines = text.split(/\r?\n/);
+          const { header, startIdx } = getHeader(resultlines);
+          console.log(header);
+          console.log(startIdx);
+
           //nums.push(resultlines.forEach(parseLine));	
-          rows = defineObj();
-          for (var i = 0; i < resultlines.length; i++) {
+          rows = defineObj(header);
+          for (var i = startIdx; i < resultlines.length; i++) {
             var tLine = parseLine(resultlines[i]);
-            if (!isNaN(tLine[0])) {
-              if (tLine.length == header.length) {
-                for (var j = 0; j < header.length; j++) {
-                  rows[header[j]].push(tLine[j]);
-                }
+            //if (!isNaN(tLine[0])) {
+            if (tLine.length == header.length) {
+              for (var j = 0; j < header.length; j++) {
+                rows[header[j]].push(tLine[j]);
               }
-              //nums.push( tLine );
             }
+            //nums.push( tLine );
+            //}
           }
+          console.log(rows);
           addDropdown(header);
           header.forEach(addCheckbox);
           var t1 = addLine("OUTPUT", 1, rows);
@@ -173,15 +179,15 @@
         });
 
 
-        function defineObj() {
+        function defineObj(header) {
 
           var obj = {};
-          header = ["TIME", "PITCH", "ROLL", "YAW", "YAW_CALIBRATION_OFFSET", "ACCEL_X", "ACCEL_Y", "ACCEL_Z", "PWM_LEFT", "PWM_RIGHT", "ENCODER_LEFT", "DIRECTION_LEFT", "ENCODER_RIGHT", "DIRECTION_RIGHT", "CURRENT_LEFT", "CURRENT_RIGHT", "CURRENT_MF", "CURRENT_MAGNET", "SENSOR_LEFT", "SENSOR_RIGHT", "BATTERY", "GAP_DETECT"];
+          //header = ["TIME", "PITCH", "ROLL", "YAW", "YAW_CALIBRATION_OFFSET", "ACCEL_X", "ACCEL_Y", "ACCEL_Z", "PWM_LEFT", "PWM_RIGHT", "ENCODER_LEFT", "DIRECTION_LEFT", "ENCODER_RIGHT", "DIRECTION_RIGHT", "CURRENT_LEFT", "CURRENT_RIGHT", "CURRENT_MF", "CURRENT_MAGNET", "SENSOR_LEFT", "SENSOR_RIGHT", "BATTERY", "GAP_DETECT"];
           for (var i = 0; i < header.length; i++) {
             obj[header[i]] = [];
-          }
+          };
           return obj;
-        }
+        };
 
         function parseLine(row) {
           //num = row.split(",").map(Number);
@@ -189,7 +195,25 @@
           //nums = row.split(",").filter(x => x.trim().length && !isNaN(x)).map(Number)
           //console.log(nums);
           return num;
-        }
+        };
+
+        function getHeader(resultlines) {
+
+          headerObj = {
+            header: ["TIME", "PITCH", "ROLL", "YAW", "YAW_CALIBRATION_OFFSET", "ACCEL_X", "ACCEL_Y", "ACCEL_Z", "PWM_LEFT", "PWM_RIGHT", "ENCODER_LEFT", "DIRECTION_LEFT", "ENCODER_RIGHT", "DIRECTION_RIGHT", "CURRENT_LEFT", "CURRENT_RIGHT", "CURRENT_MF", "CURRENT_MAGNET", "SENSOR_LEFT", "SENSOR_RIGHT", "BATTERY", "GAP_DETECT"],
+            startIdx: 0
+          }
+          for (var i = 0; i < 50; i++) {
+            var tLine = parseLine(resultlines[i]);
+            if (tLine.length > 2 && isNaN(tLine[1])) {
+              headerObj.header = tLine;
+              headerObj.startIdx = i + 1;
+              return headerObj;
+            };
+            //nums.push( tLine );
+          };
+          return headerObj;
+        };
 
 
         //plotFromCSV(event.target.result);
@@ -217,12 +241,16 @@
       //var span = document.createElement('span');
       //span.className="checkmark";
       var br = document.createElement('br');
+      //var lbl = document.createTextNode(colName);
+      br.onclick = "console.log(\"click\")";
+
       var element = document.getElementById("sidenav");
       element.appendChild(cont);
       cont.appendChild(checkbox);
       cont.appendChild(checkbox2);
       //cont.appendChild(span);
       cont.appendChild(document.createTextNode(colName));
+      //cont.appendChild(lbl);
       cont.appendChild(br);
 
     }
