@@ -8,7 +8,6 @@
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-
     gtag('config', 'G-L09DQY6L0Z');
   </script>
 
@@ -58,9 +57,6 @@
 
 
     function addDropdown(values) {
-
-      //var values = ["dog", "cat", "parrot", "rabbit"];
-
       var select = document.createElement("select");
       select.name = "x_axis";
       select.id = "x_axis"
@@ -121,11 +117,18 @@
         <a href="#" class="context-menu__link" data-action="fixAngle"><i class="context-menu-action"></i> Smooth
           Angles</a>
       </li>
+      <li class="context-menu__item">
+        <a href="#" class="context-menu__link" data-action="showStat"><i class="context-menu-action"></i> Show
+          Statistics</a>
+      </li>
+      <li class="context-menu__item">
+        <a href="#" class="context-menu__link" data-action="cutToZoom"><i class="context-menu-action"></i> Cut to Zoomed
+          Area</a>
+      </li>
     </ul>
   </nav>
 
   <script>
-    //onclick='console.log("Click")'
     const fileSelector = document.getElementById('file-selector');
     fileSelector.addEventListener('change', (event) => {
       const fileList = event
@@ -137,18 +140,9 @@
     });
 
     function readFile(file) {
-      // Check if the file is an image.
-      //if (file.type && !file.type.startsWith('image/')) {
-      //  console.log('File is not an image.', file.type, file);
-      //  return;
-      //}
-
       const reader = new FileReader();
       reader.addEventListener('load', (event) => {
-        //img.src = event.target.result;
         ttt = Plotly.d3.text(event.target.result, function (text) {
-          //var nums = [];
-
           resultlines = text.split(/\r?\n/);
           const { header, startIdx } = getHeader(resultlines);
           console.log(header);
@@ -164,8 +158,6 @@
                 rows[header[j]].push(tLine[j]);
               }
             }
-            //nums.push( tLine );
-            //}
           }
           try {
             cleanUp();
@@ -188,7 +180,6 @@
 
           //processData(rows);
           window.rows = rows;
-          //console.log(nums);
           //return nums;
         });
 
@@ -196,7 +187,6 @@
         function defineObj(header) {
 
           var obj = {};
-          //header = ["TIME", "PITCH", "ROLL", "YAW", "YAW_CALIBRATION_OFFSET", "ACCEL_X", "ACCEL_Y", "ACCEL_Z", "PWM_LEFT", "PWM_RIGHT", "ENCODER_LEFT", "DIRECTION_LEFT", "ENCODER_RIGHT", "DIRECTION_RIGHT", "CURRENT_LEFT", "CURRENT_RIGHT", "CURRENT_MF", "CURRENT_MAGNET", "SENSOR_LEFT", "SENSOR_RIGHT", "BATTERY", "GAP_DETECT"];
           for (var i = 0; i < header.length; i++) {
             obj[header[i]] = [];
           };
@@ -224,12 +214,9 @@
               headerObj.startIdx = i + 1;
               return headerObj;
             };
-            //nums.push( tLine );
           };
           return headerObj;
         };
-
-
         //plotFromCSV(event.target.result);
       });
       reader.readAsDataURL(file);
@@ -285,8 +272,6 @@
       var checkedBoxes = getCheckedBoxes("signalCheckbox");
       var checkedBoxes2 = getCheckedBoxes("signalCheckbox2");
 
-      //console.log(checkedBoxes2[0].id)
-      //var t2 = addLine(checkedBoxes[0].id, window.rows);
       traces = [];
       let i = 0;
       while (i < checkedBoxes.length) {
@@ -329,8 +314,7 @@
     }
 
     function menuItemExecute(caller, action) {
-
-      console.log(caller + " " + action);
+      // console.log(caller + " " + action);
       switch (action) {
         case "Rename":
           renameVar(caller);
@@ -398,7 +382,6 @@
     }
 
     function integrate(y, x) {
-
       let Ts = 0.01;
       let yInt = [];
       yInt[0] = parseFloat(y[0]);
@@ -409,14 +392,12 @@
     }
 
     function detrend(y, x) {
-
       let a = (parseFloat(y[y.length - 1]) - parseFloat(y[0])) / (y.length - 1);
       let yd = y.map((item, i) => parseFloat(y[i]) - a * i);
       return yd;
     }
 
     function fixAngle(y, x) {
-
       let yo = [];
       let bias = 0;
       yo[0] = y[0];
@@ -438,26 +419,26 @@
 
     let strClean = (str) => str.replace(/[^a-zA-Z0-9 ]/g, "");
 
-////////////////////////// End of Math Operations ///////////////////////////
+    ////////////////////////// End of Math Operations ///////////////////////////
 
-// addCheckbox("Test")
+    gd.data.forEach(trace => {
+      var len = Math.min(trace.x.length, trace.y.length)
+      var xInside = []
+      var yInside = []
 
-gd.data.forEach(trace => {
-  var len = Math.min(trace.x.length, trace.y.length)
-  var xInside = []
-  var yInside = []
+      for (var i = 0; i < len; i++) {
+        var x = trace.x[i]
+        var y = trace.y[i]
 
-  for (var i = 0; i < len; i++) {
-    var x = trace.x[i]
-    var y = trace.y[i]
+        if (x > xRange[0] && x < xRange[1] && y > yRange[0] && y < yRange[1]) {
+          xInside.push(x)
+          yInside.push(y)
+        }
+      }
+    });
 
-    if(x > xRange[0] && x < xRange[1] && y > yRange[0] && y < yRange[1]) {
-      xInside.push(x)
-      yInside.push(y)
-    }
-  }
-});
   </script>
   <script src="context.js"></script>
 </body>
+
 </html>
