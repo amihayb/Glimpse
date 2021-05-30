@@ -421,22 +421,6 @@
 
     ////////////////////////// End of Math Operations ///////////////////////////
 
-    gd.data.forEach(trace => {
-      var len = Math.min(trace.x.length, trace.y.length)
-      var xInside = []
-      var yInside = []
-
-      for (var i = 0; i < len; i++) {
-        var x = trace.x[i]
-        var y = trace.y[i]
-
-        if (x > xRange[0] && x < xRange[1] && y > yRange[0] && y < yRange[1]) {
-          xInside.push(x)
-          yInside.push(y)
-        }
-      }
-    });
-
   </script>
   <script src="context.js"></script>
 </body>
