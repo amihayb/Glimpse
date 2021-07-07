@@ -2,27 +2,6 @@
 
 //const CSV =
 //"D:/Documents/MATLAB/Robot/ControlTurn/turn2.csv";
-$(document).ready(function () {
-  var showContact = findGetParameter("showContact");
-  if (showContact) {
-    alert("Hope I helped you understand your data.\nFor anything more, contact me:\nAmihay Blau\nmail: amihay@blau-eng.co.il\nPhone: +972-54-6668902");
-  }
-});
-     
-
-function findGetParameter(parameterName) {
-  var result = null,
-  tmp = [];
-  location.search
-  .substr(1)
-  .split("&")
-  .forEach(function (item) {
-    tmp = item.split("=");
-    if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
-  });
-  
-  return result;
-  };
 
 function addLine(vName, ax, allRows) {
     let x = [];
