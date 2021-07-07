@@ -1,5 +1,43 @@
 body {
     font-family: "Lato", sans-serif;
+    margin: 0;
+  }
+
+  #file-selector {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  span {
+    position: relative;
+  }
+
+  .topnav {
+    overflow: hidden;
+    background-color: #333;
+    display: flex;
+    align-items: center;
+    color: #fff;
+  }
+  
+  .topnav a , .topnav span , .topnav custom-file-upload{
+    float: left;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+  }
+
+  .topnav a:hover {
+    background-color: #ddd;
+    color: black;
   }
   
   .sidenav {
@@ -7,7 +45,7 @@ body {
     width: 260px;
     position: fixed;
     z-index: 1;
-    top: 0;
+    top: 30;
     left: 0;
     background-color: #f1f1f1;
     overflow-x: hidden;
@@ -74,16 +112,7 @@ body {
     -ms-user-select: none;
     user-select: none;
   }
-  
-  /* Hide the browser's default checkbox */
-  .container input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-  
+    
   /* Create a custom checkbox */
   .checkmark {
     position: absolute;
