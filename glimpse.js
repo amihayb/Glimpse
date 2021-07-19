@@ -348,6 +348,7 @@ function showStat() {
   var yRange = gd.layout.yaxis.range
 
   var stat = {
+    Name : [],
     Mean : [],
     STD : [],
     Min : [],
@@ -368,15 +369,29 @@ function showStat() {
         yInside.push(y)
       }
     }
+    stat.Name.push(trace.name);
     stat.Mean.push(mean(yInside));
     stat.STD.push(std(yInside));
     stat.Min.push(Math.min(...yInside));
     stat.Max.push(Math.max(...yInside));
   })
 
-  let str = JSON.stringify(stat, null, 2);
-  alert(str);
-  console.log(stat);
+  //let str = JSON.stringify(stat, null, 2);
+  alert(niceStr(stat));
+  
+
+  function niceStr(stat) {
+    //console.log(stat);
+    let str = '';
+    console.log(stat.Mean.length);
+    for (var i = 0; i < stat.Mean.length; i++) {
+      str += stat.Name[i] + ': \n';
+      str += 'Mean: ' + stat.Mean[i].toFixed(3) + '\n';
+      str += 'STD: ' + stat.STD[i].toFixed(3) + '\n\n';
+      console.log(str);
+    }
+    return str;
+  }
 }
 
 function cutToZoom() {
