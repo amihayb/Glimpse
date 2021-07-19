@@ -320,6 +320,10 @@ function menuItemExecute(caller, action) {
       addCheckbox(caller + "_angFix");
       break;
 
+    case "showStat":
+      showStat();
+      break;
+
     case "cutToZoom":
       cutToZoom();
       break;
@@ -338,6 +342,43 @@ function renameVar(oldName) {
   };
 };
 
+function showStat() {
+  var gd = document.getElementById('plot')
+  var xRange = gd.layout.xaxis.range
+  var yRange = gd.layout.yaxis.range
+
+  var stat = {
+    Mean : [],
+    STD : [],
+    Min : [],
+    Max : []
+  }
+
+  gd.data.forEach(trace => {
+    var len = Math.min(trace.x.length, trace.y.length)
+    var xInside = []
+    var yInside = []
+
+    for (var i = 0; i < len; i++) {
+      var x = trace.x[i]
+      var y = trace.y[i]
+
+      if (x > xRange[0] && x < xRange[1] && y > yRange[0] && y < yRange[1]) {
+        xInside.push(x)
+        yInside.push(y)
+      }
+    }
+    stat.Mean.push(mean(yInside));
+    stat.STD.push(std(yInside));
+    stat.Min.push(Math.min(...yInside));
+    stat.Max.push(Math.max(...yInside));
+  })
+
+  let str = JSON.stringify(stat, null, 2);
+  alert(str);
+  console.log(stat);
+}
+
 function cutToZoom() {
   var gd = document.getElementById('plot')
   var xRange = gd.layout.xaxis.range
@@ -345,8 +386,7 @@ function cutToZoom() {
 
   var idx = [];
   idx[0] = rows["TIME"].findIndex((val) => val > xRange[0]);
-  idx[1] = rows["TIME"].length - rows["TIME"].reverse().findIndex((val) => val < xRange[1]);
-  rows["TIME"].reverse();
+  idx[1] = rows["TIME"].findIndex((val) => val > xRange[1]);
 
   let fields = Object.keys(rows);
 
@@ -393,6 +433,15 @@ function fixAngle(y, x) {
     yo[i] = y[i] + bias;
   }
   return yo;
+}
+
+function std(v){
+	mu = mean(v);
+    sum = 0;
+    for (var i = 0; i < v.length; i++) {
+    	sum += Math.pow( Math.abs(v[i]-mu), 2);
+    }
+    return Math.sqrt(sum/(v.length-1));
 }
 
 let mult = (array, factor) => array.map(x => x * factor);
