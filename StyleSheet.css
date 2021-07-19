@@ -19,7 +19,7 @@ body {
   }
 
   .topnav {
-    overflow: hidden;
+    width: 100%;
     background-color: #333;
     display: flex;
     align-items: center;
@@ -70,24 +70,24 @@ body {
     width: 77%;
   }
 
-  .signature {
-    text-align: center;
-    height: 50px;
-    position: absolute;
-    width: 100%;
-    bottom: 0;
-    list-style-type: none;
-  }
   .checkboxesPlace {
     max-height: 80%;
     position: relative;
     overflow-y: auto;
   }
+
+  #explenation_text {
+    margin-left: 300px; /* Same as the width of the sidenav */
+    margin-top: 40px;
+    font-size: 18px; /* Increased text to enable scrolling */
+    padding: 0px 10px;
+    line-height: 27px
+  }
   
   .plot {
     margin-left: 260px; /* Same as the width of the sidenav */
     font-size: 28px; /* Increased text to enable scrolling */
-    padding: 0px 10px;
+    padding: 0px 0px;
   }
   
   @media screen and (max-height: 750px) {
