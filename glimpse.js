@@ -4,60 +4,60 @@
 //"D:/Documents/MATLAB/Robot/ControlTurn/turn2.csv";
 
 function addLine(vName, ax, allRows) {
-    let x = [];
-    let y = [];
+  let x = [];
+  let y = [];
 
-    var x_axis = document.getElementById("x_axis").value;
-    x = rows[x_axis];
-    y = rows[vName];
-    var trace = {
-      x: x,
-      y: y,
-      yaxis: 'y' + ax,
-      name: vName,
-      type: 'scatter',
-    };
-    return trace;
-  }
-  //plotFromCSV();
+  var x_axis = document.getElementById("x_axis").value;
+  x = rows[x_axis];
+  y = rows[vName];
+  var trace = {
+    x: x,
+    y: y,
+    yaxis: 'y' + ax,
+    name: vName,
+    type: 'scatter',
+  };
+  return trace;
+}
+//plotFromCSV();
 
-  // Pass the checkbox name to the function
-  function getCheckedBoxes(chkboxName) {
-    var checkboxes = document.getElementsByName(chkboxName);
-    var checkboxesChecked = [];
-    // loop over them all`
-    for (var i = 0; i < checkboxes.length; i++) {
-      // And stick the checked ones onto an array...
-      if (checkboxes[i].checked) {
-        checkboxesChecked.push(checkboxes[i]);
-      }
+// Pass the checkbox name to the function
+function getCheckedBoxes(chkboxName) {
+  var checkboxes = document.getElementsByName(chkboxName);
+  var checkboxesChecked = [];
+  // loop over them all`
+  for (var i = 0; i < checkboxes.length; i++) {
+    // And stick the checked ones onto an array...
+    if (checkboxes[i].checked) {
+      checkboxesChecked.push(checkboxes[i]);
     }
-    // Return the array if it is non-empty, or null
-    //return checkboxesChecked.length > 0 ? checkboxesChecked : null;
-    return checkboxesChecked;
+  }
+  // Return the array if it is non-empty, or null
+  //return checkboxesChecked.length > 0 ? checkboxesChecked : null;
+  return checkboxesChecked;
+}
+
+
+function addDropdown(values) {
+  var select = document.createElement("select");
+  select.name = "x_axis";
+  select.id = "x_axis"
+
+  for (const val of values) {
+    var option = document.createElement("option");
+    option.value = val;
+    option.text = val.charAt(0).toUpperCase() + val.slice(1);
+    select.appendChild(option);
   }
 
+  var label = document.createElement("label");
+  label.innerHTML = "X Axis: "
+  label.htmlFor = "x_axis";
 
-  function addDropdown(values) {
-    var select = document.createElement("select");
-    select.name = "x_axis";
-    select.id = "x_axis"
+  document.getElementById("xaxis_dropdown").appendChild(label).appendChild(select);
+}
 
-    for (const val of values) {
-      var option = document.createElement("option");
-      option.value = val;
-      option.text = val.charAt(0).toUpperCase() + val.slice(1);
-      select.appendChild(option);
-    }
-
-    var label = document.createElement("label");
-    label.innerHTML = "X Axis: "
-    label.htmlFor = "x_axis";
-
-    document.getElementById("xaxis_dropdown").appendChild(label).appendChild(select);
-  }
-
-  const fileSelector = document.getElementById('file-selector');
+const fileSelector = document.getElementById('file-selector');
 fileSelector.addEventListener('change', (event) => {
   const fileList = event
     .target.files;
@@ -67,7 +67,39 @@ fileSelector.addEventListener('change', (event) => {
   }
 });
 
+function showExample() {
+    let header = ["TIME", "Sine", "Cosine", "Random"];
+    let startIdx =  0;
+  rows = defineObj(header);
+  rows["TIME"] = Plotly.d3.range(0.1, 10, 0.1);
+  rows["Sine"] = rows["TIME"].map(x => Math.sin(x));
+  rows["Cosine"] = rows["TIME"].map(x => Math.cos(x));
+  rows["Random"] = rows["TIME"].map(x => Math.random());
+  try {
+    cleanUp();
+  } catch (error) { };
+  addDropdown(header);
+  header.forEach(addCheckbox);
+
+  var t1 = addLine(header[1], 0, rows);
+  var t2 = addLine(header[2], 0, rows);
+  data = [t1, t2];
+  var layout = {
+    grid: {
+      rows: 1,
+      columns: 1,
+      pattern: 'coupled',
+      roworder: 'bottom to top'
+    }
+  };
+
+  Plotly.newPlot('plot', data, layout, { editable: true });
+  window.rows = rows;
+}
+
 function readFile(file) {
+  console.log(file);
+
   const reader = new FileReader();
   reader.addEventListener('load', (event) => {
     ttt = Plotly.d3.text(event.target.result, function (text) {
@@ -111,16 +143,6 @@ function readFile(file) {
       //return nums;
     });
 
-
-    function defineObj(header) {
-
-      var obj = {};
-      for (var i = 0; i < header.length; i++) {
-        obj[header[i]] = [];
-      };
-      return obj;
-    };
-
     function parseLine(row) {
       //num = row.split(",").map(Number);
       num = row.split(",");
@@ -149,6 +171,15 @@ function readFile(file) {
   });
   reader.readAsDataURL(file);
 }
+
+function defineObj(header) {
+
+  var obj = {};
+  for (var i = 0; i < header.length; i++) {
+    obj[header[i]] = [];
+  };
+  return obj;
+};
 
 
 function addCheckbox(colName) {
@@ -232,6 +263,9 @@ function sel() {
 }
 
 function cleanUp() {
+  var explenation_text = document.getElementById("explenation_text");
+  explenation_text.style.display = "none";
+
   let containers = document.getElementsByClassName("container1");
   for (var i = containers.length - 1; i >= 0; i--) {
     containers[i].remove();
@@ -285,6 +319,11 @@ function menuItemExecute(caller, action) {
       window.rows[caller + "_angFix"] = fixAngle(window.rows[caller]);
       addCheckbox(caller + "_angFix");
       break;
+
+    case "cutToZoom":
+      cutToZoom();
+      break;
+
   }
 };
 
@@ -295,8 +334,28 @@ function renameVar(oldName) {
     delete window.rows[oldName];
     toChange = document.getElementById(oldName);
     toChange.innerHTML = toChange.innerHTML.replaceAll(oldName, newName);
+    toChange.onclick = sel;
   };
 };
+
+function cutToZoom() {
+  var gd = document.getElementById('plot')
+  var xRange = gd.layout.xaxis.range
+  console.log(xRange);
+
+  var idx = [];
+  idx[0] = rows["TIME"].findIndex((val) => val > xRange[0]);
+  idx[1] = rows["TIME"].length - rows["TIME"].reverse().findIndex((val) => val < xRange[1]);
+  rows["TIME"].reverse();
+
+  let fields = Object.keys(rows);
+
+  fields.forEach(field => rows[field] = rows[field].slice(idx[0], idx[1]));
+
+  sel();
+}
+
+
 ////////////////////////////// Math Operations //////////////////////////////
 function diff(y, x) {
   let Ts = 0.01;
@@ -345,5 +404,8 @@ let removeMean = (array) => array.map((item, idx, all) => parseFloat(item) - mea
 let mean = (array) => array.reduce((a, b) => parseFloat(a) + parseFloat(b)) / array.length;
 
 let strClean = (str) => str.replace(/[^a-zA-Z0-9 ]/g, "");
+
+//var minIdx = (array, val) => array.findIndex(n => n > val);
+//var maxIdx = (array, val) => array.findIndex(n => n > val);
 
     ////////////////////////// End of Math Operations ///////////////////////////
