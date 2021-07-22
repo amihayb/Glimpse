@@ -165,6 +165,9 @@ function readFile(file) {
           return headerObj;
         };
       };
+      if (tLine.length != headerObj.header.length) {
+        headerObj = header4noHeader(tLine.length);
+      }
       return headerObj;
     };
     //plotFromCSV(event.target.result);
@@ -180,6 +183,17 @@ function defineObj(header) {
   };
   return obj;
 };
+
+function header4noHeader(n) {
+  headerObj = {
+    header: ["TIME"],
+    startIdx: 0
+  }
+  for (var i = 1; i < n; i++) {
+    headerObj.header.push("S" + i);
+  }
+  return headerObj;
+}
 
 
 function addCheckbox(colName) {
