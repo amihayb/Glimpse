@@ -119,11 +119,15 @@ function readFile(file) {
           }
         }
       }
+
       try {
         cleanUp();
       } catch (error) { };
       addDropdown(header);
       header.forEach(addCheckbox);
+      if (isEcopiaHeader(headerObj.header))
+        setEcopiaRec();
+        
       var t1 = addLine("OUTPUT", 1, rows);
       var t2 = addLine("ENCODERS_DIFF", 1, rows);
       data = [t1, t2];
@@ -165,7 +169,7 @@ function readFile(file) {
           return headerObj;
         };
       };
-      if (tLine.length != headerObj.header.length) {
+      if (tLine.length != headerObj.header.length) { // No header
         headerObj = header4noHeader(tLine.length);
       }
       return headerObj;
@@ -195,6 +199,19 @@ function header4noHeader(n) {
   return headerObj;
 }
 
+function isEcopiaHeader(header) {
+  if (header.includes("Yaw") & header.includes("BatteryVoltage"))
+    return true
+  return false
+}
+
+function setEcopiaRec() {
+  rows["Yaw"] = mult(rows["Yaw"], 0.01);
+  rows["Pitch"] = mult(rows["Pitch"], 0.01);
+  rows["Roll"] = mult(rows["Roll"], 0.01);
+  window.rows["Yaw" + "_angFix"] = fixAngle(window.rows["Yaw"]);
+  addCheckbox("Yaw" + "_angFix");
+}
 
 function addCheckbox(colName) {
   var cont = document.createElement('container');
@@ -231,13 +248,8 @@ function addCheckbox(colName) {
 }
 
 function verifyGoodName(name) {
-  for (i = 0; i < name.length; i++) {
-    if (name[i] === ' ') {
-      name = name.slice(1, name.length);
-    }
-    return name;
-  }
-
+  name = name.map(element => element.replace(' ',''));
+  return name;
 }
 
 function sel() {
