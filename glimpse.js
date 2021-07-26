@@ -127,7 +127,7 @@ function readFile(file) {
       header.forEach(addCheckbox);
       if (isEcopiaHeader(headerObj.header))
         setEcopiaRec();
-        
+
       var t1 = addLine("OUTPUT", 1, rows);
       var t2 = addLine("ENCODERS_DIFF", 1, rows);
       data = [t1, t2];
@@ -354,6 +354,9 @@ function menuItemExecute(caller, action) {
       cutToZoom();
       break;
 
+    case "dataTips":
+      markDataTips();
+      break;
   }
 };
 
@@ -434,6 +437,31 @@ function cutToZoom() {
   fields.forEach(field => rows[field] = rows[field].slice(idx[0], idx[1]));
 
   sel();
+}
+
+function markDataTips() {
+  var myPlot = document.getElementById('plot');
+
+  myPlot.on('plotly_click', function (data) {
+    var pts = '';
+    for (var i = 0; i < data.points.length; i++) {
+
+      annotate_text = 'x = ' + data.points[i].x +
+        ', y = ' + data.points[i].y.toPrecision(4);
+
+      annotation = {
+        text: annotate_text,
+        x: data.points[i].x,
+        y: parseFloat(data.points[i].y.toPrecision(4)),
+        xref: data.points[0].xaxis._id,
+        yref: data.points[0].yaxis._id
+      }
+      annotations = plot.layout.annotations || [];
+      annotations.push(annotation);
+
+      Plotly.relayout('plot', { annotations: annotations })
+    }
+  });
 }
 
 
