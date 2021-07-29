@@ -68,8 +68,8 @@ fileSelector.addEventListener('change', (event) => {
 });
 
 function showExample() {
-    let header = ["TIME", "Sine", "Cosine", "Random"];
-    let startIdx =  0;
+  let header = ["TIME", "Sine", "Cosine", "Random"];
+  let startIdx = 0;
   rows = defineObj(header);
   rows["TIME"] = Plotly.d3.range(0.1, 10, 0.1);
   rows["Sine"] = rows["TIME"].map(x => Math.sin(x));
@@ -248,7 +248,7 @@ function addCheckbox(colName) {
 }
 
 function verifyGoodName(name) {
-  name = name.map(element => element.replace(' ',''));
+  name = name.map(element => element.replace(' ', ''));
   return name;
 }
 
@@ -377,11 +377,11 @@ function showStat() {
   var yRange = gd.layout.yaxis.range
 
   var stat = {
-    Name : [],
-    Mean : [],
-    STD : [],
-    Min : [],
-    Max : []
+    Name: [],
+    Mean: [],
+    STD: [],
+    Min: [],
+    Max: []
   }
 
   gd.data.forEach(trace => {
@@ -407,7 +407,7 @@ function showStat() {
 
   //let str = JSON.stringify(stat, null, 2);
   alert(niceStr(stat));
-  
+
 
   function niceStr(stat) {
     //console.log(stat);
@@ -445,10 +445,8 @@ function markDataTips() {
   myPlot.on('plotly_click', function (data) {
     var pts = '';
     for (var i = 0; i < data.points.length; i++) {
-
       annotate_text = 'x = ' + data.points[i].x +
         ', y = ' + data.points[i].y.toPrecision(4);
-
       annotation = {
         text: annotate_text,
         x: data.points[i].x,
@@ -504,13 +502,13 @@ function fixAngle(y, x) {
   return yo;
 }
 
-function std(v){
-	mu = mean(v);
-    sum = 0;
-    for (var i = 0; i < v.length; i++) {
-    	sum += Math.pow( Math.abs(v[i]-mu), 2);
-    }
-    return Math.sqrt(sum/(v.length-1));
+function std(v) {
+  mu = mean(v);
+  sum = 0;
+  for (var i = 0; i < v.length; i++) {
+    sum += Math.pow(Math.abs(v[i] - mu), 2);
+  }
+  return Math.sqrt(sum / (v.length - 1));
 }
 
 let mult = (array, factor) => array.map(x => x * factor);
