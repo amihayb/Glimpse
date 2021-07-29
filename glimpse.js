@@ -429,9 +429,13 @@ function cutToZoom() {
   console.log(xRange);
 
   var idx = [];
-  idx[0] = rows["TIME"].findIndex((val) => val > xRange[0]);
-  idx[1] = rows["TIME"].findIndex((val) => val > xRange[1]);
-
+  try {
+    idx[0] = rows["TIME"].findIndex((val) => val > xRange[0]);
+    idx[1] = rows["TIME"].findIndex((val) => val > xRange[1]);
+  } catch {
+    idx[0] = rows["Time"].findIndex((val) => val > xRange[0]);
+    idx[1] = rows["Time"].findIndex((val) => val > xRange[1]);
+}
   let fields = Object.keys(rows);
 
   fields.forEach(field => rows[field] = rows[field].slice(idx[0], idx[1]));
