@@ -14,6 +14,7 @@
   <link href="StyleSheet.css" rel="stylesheet">
   <link rel="shortcut icon" href="images/glimpse.ico" />
   <link rel="icon" href="images/glimpse.ico" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -21,10 +22,13 @@
 
 <body>
   <div class="topnav" margin-left="260px" padding="0px 10px">
-    <a margin-left="260px" href="">Glimpse</a>
-    <span>Load File
+    <a margin-left="260px" href="" title="Glimpse"><i class="fa fa-home"></i></a>
+    <span><i class="fa fa-folder-open" title="Open File"></i>
       <input id="file-selector" type="file" />
     </span>
+    <a onclick="cutToZoom()" title="Cut to Zoomed Area"><i class="fa fa-cut"></i></a>
+    <a onclick="markDataTips()" title="Data Tips"><i class="fa fa-map-marker"></i></a>
+    <a onclick="showStat()" title="Show Statistics"><i class="fa fa-list-ol"></i></a>
     <a href="#example" onclick="showExample()">Example File</a>
     <a onclick="alert('Hope I helped you understand your data.\nFor anything more, contact me:\nAmihay Blau\nmail: amihay@blau-eng.co.il\nPhone: +972-54-6668902');">by Amihay Blau</a>
   </div>
@@ -35,7 +39,7 @@
   <div id="explenation_text">
     Glimpse – Visualize your data<br>
       <br>
-    •	Load CSV or text files with your data organized in columns.<br>
+    •	Load CSV or text files with your data in columns.<br>
     •	Mark checkboxes to show signals on upper or lower scope window.<br>
     •	You can change the X-Axis to any signal from the drop down menu.<br>
     •	Right click on signal name to apply operations and play with it.<br>
@@ -75,12 +79,15 @@
           Angles</a>
       </li>
       <li class="context-menu__item">
-        <a href="#" class="context-menu__link" data-action="showStat"><i class="context-menu-action"></i> Show
-          Statistics</a>
-      </li>
-      <li class="context-menu__item">
         <a href="#" class="context-menu__link" data-action="cutToZoom"><i class="context-menu-action"></i> Cut to Zoomed
           Area</a>
+      </li>
+      <li class="context-menu__item">
+        <a href="#" class="context-menu__link" data-action="dataTips"><i class="context-menu-action"></i> Data Tips</a>
+      </li>
+      <li class="context-menu__item">
+        <a href="#" class="context-menu__link" data-action="showStat"><i class="context-menu-action"></i> Show
+          Statistics</a>
       </li>
     </ul>
   </nav>
