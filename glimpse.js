@@ -1,8 +1,5 @@
 // Glimpse
 
-//const CSV =
-//"D:/Documents/MATLAB/Robot/ControlTurn/turn2.csv";
-
 function addLine(vName, ax, allRows) {
   let x = [];
   let y = [];
@@ -426,21 +423,25 @@ function showStat() {
 function cutToZoom() {
   var gd = document.getElementById('plot')
   var xRange = gd.layout.xaxis.range
-  console.log(xRange);
+  //console.log(xRange);
+  var x_axis = document.getElementById("x_axis").value;
 
   var idx = [];
-  try {
-    idx[0] = rows["TIME"].findIndex((val) => val > xRange[0]);
-    idx[1] = rows["TIME"].findIndex((val) => val > xRange[1]);
-  } catch {
-    idx[0] = rows["Time"].findIndex((val) => val > xRange[0]);
-    idx[1] = rows["Time"].findIndex((val) => val > xRange[1]);
-}
+  if (typeof rows[x_axis][2] !== 'string') {
+      idx[0] = rows[x_axis].findIndex((val) => val > xRange[0]);
+      idx[1] = rows[x_axis].findIndex((val) => val > xRange[1]);
+  } else {
+    idx = xRange;
+  }
   let fields = Object.keys(rows);
 
   fields.forEach(field => rows[field] = rows[field].slice(idx[0], idx[1]));
 
   sel();
+}
+
+function relativeTime() {
+  rows["TIME"].map
 }
 
 function markDataTips() {
