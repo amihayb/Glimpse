@@ -516,6 +516,75 @@ function std(v) {
   return Math.sqrt(sum / (v.length - 1));
 }
 
+function export2csv() {
+
+  exportToCsv('download.csv', rows);
+}
+
+function exportToCsv(filename, rows) {
+  
+  var processRow = function (row) {
+      var finalVal = '';
+      for (var j = 0; j < row.length; j++) {
+        var result = processVal(row[j])
+        if (j > 0)
+          finalVal += ',';
+        finalVal += result;
+      }
+      return finalVal + '\n';
+  };
+
+  var csvFile = '';
+  // for (var i = 0; i < rows.length; i++) {
+  //     csvFile += processRow(rows[i]););
+  // }
+  let fields = Object.keys(rows);
+
+  csvFile += processRow(Object.keys(rows));
+  //Object.keys(rows).forEach(field => csvFile += processRow(rows[field]));
+  for (var j = 0; j < rows[fields[0]].length; j++) {
+    csvFile += column2row(rows,j);
+  }
+
+
+  var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+  if (navigator.msSaveBlob) { // IE 10+
+      navigator.msSaveBlob(blob, filename);
+  } else {
+      var link = document.createElement("a");
+      if (link.download !== undefined) { // feature detection
+          // Browsers that support HTML5 download attribute
+          var url = URL.createObjectURL(blob);
+          link.setAttribute("href", url);
+          link.setAttribute("download", filename);
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      }
+  }
+
+  function column2row(row,j){
+    let finalVal = '';
+    Object.keys(rows).forEach(field => finalVal += processVal(row[field][j])+',');
+    finalVal = finalVal.slice(0,-1);
+    return finalVal + '\n';
+  }
+
+  function processVal(val){
+    var innerValue = val === null ? '' : val.toString();
+      if (val instanceof Date) {
+          innerValue = val.toLocaleString();
+      };
+      var result = innerValue.replace(/"/g, '""');
+      if (result.search(/("|,|\n)/g) >= 0)
+          result = '"' + result + '"';
+      return result;
+  }
+}
+
+
+
 let mult = (array, factor) => array.map(x => x * factor);
 
 let removeFirst = (array) => array.map((item, idx, all) => parseFloat(item) - parseFloat(all[0]));
