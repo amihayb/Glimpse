@@ -371,12 +371,19 @@ function renameVar(oldName) {
 function showStat() {
   var gd = document.getElementById('plot')
   var xRange = gd.layout.xaxis.range
-  var yRange = gd.layout.yaxis.range
+  try {
+    var yRange = gd.layout.yaxis.range
+  } catch {
+    var yRange = gd.layout.yaxis2.range
+  }
   var x_axis = document.getElementById("x_axis").value;
-
+  
+  var xIdx = [];
   if (typeof rows[x_axis][2] == 'string') {
-    xRange[0] = rows[x_axis][Math.floor(xRange[0])];
-    xRange[1] = rows[x_axis][Math.floor(xRange[1])];
+    xIdx[0] = rows[x_axis][Math.floor(xRange[0])];
+    xIdx[1] = rows[x_axis][Math.floor(xRange[1])];
+  } else {
+    xIdx = xRange;
   }
 
   var stat = {
@@ -396,7 +403,7 @@ function showStat() {
       var x = trace.x[i]
       var y = trace.y[i]
 
-      if (x > xRange[0] && x < xRange[1] && y > yRange[0] && y < yRange[1]) {
+      if (x > xIdx[0] && x < xIdx[1] && y > yRange[0] && y < yRange[1]) {
         xInside.push(x)
         yInside.push(y)
       }
