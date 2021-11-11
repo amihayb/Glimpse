@@ -372,6 +372,12 @@ function showStat() {
   var gd = document.getElementById('plot')
   var xRange = gd.layout.xaxis.range
   var yRange = gd.layout.yaxis.range
+  var x_axis = document.getElementById("x_axis").value;
+
+  if (typeof rows[x_axis][2] == 'string') {
+    xRange[0] = rows[x_axis][Math.floor(xRange[0])];
+    xRange[1] = rows[x_axis][Math.floor(xRange[1])];
+  }
 
   var stat = {
     Name: [],
@@ -412,6 +418,8 @@ function showStat() {
     console.log(stat.Mean.length);
     for (var i = 0; i < stat.Mean.length; i++) {
       str += stat.Name[i] + ': \n';
+      str += 'Min: ' + stat.Min[i].toFixed(3) + '\n';
+      str += 'Max: ' + stat.Max[i].toFixed(3) + '\n';
       str += 'Mean: ' + stat.Mean[i].toFixed(3) + '\n';
       str += 'STD: ' + stat.STD[i].toFixed(3) + '\n\n';
       console.log(str);
