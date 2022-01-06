@@ -323,6 +323,11 @@ function menuItemExecute(caller, action) {
       addCheckbox(caller + "_int");
       break;
 
+    case "filter":
+        window.rows[caller + "_filter"] = filter(window.rows[caller]);
+        addCheckbox(caller + "_filter");
+        break;
+
     case "Detrend":
       window.rows[caller + "_detrend"] = detrend(window.rows[caller]);
       addCheckbox(caller + "_detrend");
@@ -502,6 +507,26 @@ function integrate(y, x) {
     yInt[i] = yInt[i - 1] + Ts * parseFloat(y[i]);
   }
   return yInt;
+}
+
+function filter(y) {
+  let Ts = 0.01;
+
+  let N0 = 0.0198250831839801;
+  let N1 = 0.0396501663679602;
+  let N2 = 0.0198250831839801;
+  let D1 = -1.56731054883897;
+  let D2 = 0.646610881574895;
+
+  //〖yf〗_k=N_0 y_k+N_1 y_(k-1)+N_2 y_(k-2)- D_1 〖yf〗_(k-1)-D_2 〖yf〗_(k-2)
+  let yf = [];
+  for (i = 0; i < y.length; i++) {
+    yf[i] = ( (i>=2) ? parseFloat(N0*y[i] + N1*y[i-1] + N2*y[i-2] - D1*yf[i-1] - D2*yf[i-2]) : parseFloat(y[i]) );
+  }
+  //yf = y.map((item, i) => (i>=2) ? parseFloat(N0*y[i] + N1*y[i-1] + N2*y[i-2] - D1*yf[i-1] - D2*yf[i-2]) : parseFloat(y[i]) );
+  //yf = y.map((item, i) => (i>=2) ? parseFloat(7) : parseFloat(y[i]) );
+
+  return yf;
 }
 
 function detrend(y, x) {
