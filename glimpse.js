@@ -324,9 +324,12 @@ function menuItemExecute(caller, action) {
       break;
 
     case "filter":
-        window.rows[caller + "_filter"] = filter(window.rows[caller]);
+      var filter_w = prompt("LPF Cutoff Frequency? [Hz] ", 5);
+      if (filter_w !== null) {
+        window.rows[caller + "_filter"] = filter(window.rows[caller], filter_w);
         addCheckbox(caller + "_filter");
-        break;
+      }
+      break;
 
     case "Detrend":
       window.rows[caller + "_detrend"] = detrend(window.rows[caller]);
@@ -382,7 +385,7 @@ function showStat() {
     var yRange = gd.layout.yaxis2.range
   }
   var x_axis = document.getElementById("x_axis").value;
-  
+
   var xIdx = [];
   if (typeof rows[x_axis][2] == 'string') {
     xIdx[0] = rows[x_axis][Math.floor(xRange[0])];
@@ -448,8 +451,8 @@ function cutToZoom() {
 
   var idx = [];
   if (typeof rows[x_axis][2] !== 'string') {
-      idx[0] = rows[x_axis].findIndex((val) => val > xRange[0]);
-      idx[1] = rows[x_axis].findIndex((val) => val > xRange[1]);
+    idx[0] = rows[x_axis].findIndex((val) => val > xRange[0]);
+    idx[1] = rows[x_axis].findIndex((val) => val > xRange[1]);
   } else {
     idx = xRange;
   }
@@ -509,19 +512,34 @@ function integrate(y, x) {
   return yInt;
 }
 
-function filter(y) {
+function filter(y, ws) {
   let Ts = 0.01;
-
-  let N0 = 0.0198250831839801;
+  w = parseFloat(ws);
+  console.log(w)
+  /*let N0 = 0.0198250831839801;
   let N1 = 0.0396501663679602;
   let N2 = 0.0198250831839801;
   let D1 = -1.56731054883897;
-  let D2 = 0.646610881574895;
+  let D2 = 0.646610881574895;*/
+  const pi = 3.1416;
+  let D0 = pi ** 2 * w ** 2 + 140 * pi * w + 10000;
+  let D1 = (2 * pi ** 2 * w ** 2 - 20000) / D0;
+  let D2 = (pi ** 2 * w ** 2 - 140 * pi * w + 10000) / D0;
+  let N0 = (w ** 2 * pi ** 2) / D0;
+  let N1 = (2 * w ** 2 * pi ** 2) / D0;
+  let N2 = N0;
+
+  console.log(N0);
+  console.log(N1);
+  console.log(N2);
+  console.log(D1);
+  console.log(D2);
+
 
   //〖yf〗_k=N_0 y_k+N_1 y_(k-1)+N_2 y_(k-2)- D_1 〖yf〗_(k-1)-D_2 〖yf〗_(k-2)
   let yf = [];
   for (i = 0; i < y.length; i++) {
-    yf[i] = ( (i>=2) ? parseFloat(N0*y[i] + N1*y[i-1] + N2*y[i-2] - D1*yf[i-1] - D2*yf[i-2]) : parseFloat(y[i]) );
+    yf[i] = ((i >= 2) ? parseFloat(N0 * y[i] + N1 * y[i - 1] + N2 * y[i - 2] - D1 * yf[i - 1] - D2 * yf[i - 2]) : parseFloat(y[i]));
   }
   //yf = y.map((item, i) => (i>=2) ? parseFloat(N0*y[i] + N1*y[i-1] + N2*y[i-2] - D1*yf[i-1] - D2*yf[i-2]) : parseFloat(y[i]) );
   //yf = y.map((item, i) => (i>=2) ? parseFloat(7) : parseFloat(y[i]) );
@@ -562,16 +580,16 @@ function export2csv() {
 }
 
 function exportToCsv(filename, rows) {
-  
+
   var processRow = function (row) {
-      var finalVal = '';
-      for (var j = 0; j < row.length; j++) {
-        var result = processVal(row[j])
-        if (j > 0)
-          finalVal += ',';
-        finalVal += result;
-      }
-      return finalVal + '\n';
+    var finalVal = '';
+    for (var j = 0; j < row.length; j++) {
+      var result = processVal(row[j])
+      if (j > 0)
+        finalVal += ',';
+      finalVal += result;
+    }
+    return finalVal + '\n';
   };
 
   var csvFile = '';
@@ -583,43 +601,43 @@ function exportToCsv(filename, rows) {
   csvFile += processRow(Object.keys(rows));
   //Object.keys(rows).forEach(field => csvFile += processRow(rows[field]));
   for (var j = 0; j < rows[fields[0]].length; j++) {
-    csvFile += column2row(rows,j);
+    csvFile += column2row(rows, j);
   }
 
 
   var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
   if (navigator.msSaveBlob) { // IE 10+
-      navigator.msSaveBlob(blob, filename);
+    navigator.msSaveBlob(blob, filename);
   } else {
-      var link = document.createElement("a");
-      if (link.download !== undefined) { // feature detection
-          // Browsers that support HTML5 download attribute
-          var url = URL.createObjectURL(blob);
-          link.setAttribute("href", url);
-          link.setAttribute("download", filename);
-          link.style.visibility = 'hidden';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-      }
+    var link = document.createElement("a");
+    if (link.download !== undefined) { // feature detection
+      // Browsers that support HTML5 download attribute
+      var url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   }
 
-  function column2row(row,j){
+  function column2row(row, j) {
     let finalVal = '';
-    Object.keys(rows).forEach(field => finalVal += processVal(row[field][j])+',');
-    finalVal = finalVal.slice(0,-1);
+    Object.keys(rows).forEach(field => finalVal += processVal(row[field][j]) + ',');
+    finalVal = finalVal.slice(0, -1);
     return finalVal + '\n';
   }
 
-  function processVal(val){
+  function processVal(val) {
     var innerValue = val === null ? '' : val.toString();
-      if (val instanceof Date) {
-          innerValue = val.toLocaleString();
-      };
-      var result = innerValue.replace(/"/g, '""');
-      if (result.search(/("|,|\n)/g) >= 0)
-          result = '"' + result + '"';
-      return result;
+    if (val instanceof Date) {
+      innerValue = val.toLocaleString();
+    };
+    var result = innerValue.replace(/"/g, '""');
+    if (result.search(/("|,|\n)/g) >= 0)
+      result = '"' + result + '"';
+    return result;
   }
 }
 
