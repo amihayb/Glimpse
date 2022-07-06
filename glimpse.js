@@ -94,6 +94,7 @@ function showExample() {
   window.rows = rows;
 }
 
+
 function readFile(file) {
   console.log(file);
 
@@ -102,8 +103,8 @@ function readFile(file) {
     ttt = Plotly.d3.text(event.target.result, function (text) {
       resultlines = text.split(/\r?\n/);
       const { header, startIdx } = getHeader(resultlines);
-      console.log(header);
-      console.log(startIdx);
+      //console.log(header);
+      //console.log(startIdx);
 
       //nums.push(resultlines.forEach(parseLine));	
       rows = defineObj(header);
@@ -158,19 +159,39 @@ function readFile(file) {
         header: ["TIME", "PITCH", "ROLL", "YAW", "YAW_CALIBRATION_OFFSET", "ACCEL_X", "ACCEL_Y", "ACCEL_Z", "PWM_LEFT", "PWM_RIGHT", "ENCODER_LEFT", "DIRECTION_LEFT", "ENCODER_RIGHT", "DIRECTION_RIGHT", "CURRENT_LEFT", "CURRENT_RIGHT", "CURRENT_MF", "CURRENT_MAGNET", "SENSOR_LEFT", "SENSOR_RIGHT", "BATTERY", "GAP_DETECT"],
         startIdx: 0
       }
+      
       for (var i = 0; i < 50; i++) {
         var tLine = parseLine(resultlines[i]);
         if (tLine.length > 2 && isNaN(tLine[1])) {
           headerObj.header = verifyGoodName(tLine);
           headerObj.startIdx = i + 1;
-          return headerObj;
+          //return headerObj;
+          break;
         };
       };
+      if (document.getElementById("labelsNavBar").style.display != "none") {
+        headerObj = headerFromUser(headerObj);
+      }
+
       if (tLine.length != headerObj.header.length) { // No header
         headerObj = header4noHeader(tLine.length);
       }
+      
+
       return headerObj;
     };
+
+    function headerFromUser(headerObj) {
+
+      headerObj.header = [];      
+      var tLine = parseLine( document.getElementById("labelsInput").value );
+        if (tLine.length > 2 && isNaN(tLine[1])) {
+          headerObj.header = verifyGoodName(tLine);
+          headerObj.startIdx = 0;
+          return headerObj;
+        }
+    }
+    
     //plotFromCSV(event.target.result);
   });
   reader.readAsDataURL(file);
@@ -642,6 +663,40 @@ function exportToCsv(filename, rows) {
 }
 
 
+function addLabelsLine() {
+
+  if (document.getElementById("labelsNavBar").style.display == "none") {
+    document.getElementById('labelsNavBar').style.display = 'flex';
+
+    var SignalLabels = localStorage["SignalLabels"];
+    if (SignalLabels != undefined) {
+      document.getElementById("labelsInput").value = SignalLabels;
+    }
+    document.getElementById("labelsInput").addEventListener('input', updateValue);
+  } else {
+    document.getElementById('labelsNavBar').style.display = 'none';
+  }
+
+  function updateValue(e) {
+    localStorage.setItem('SignalLabels', document.getElementById("labelsInput").value);
+  }
+
+  /*if ( !document.getElementById('labelsInput') ) {
+
+  var label = document.createElement("label");
+  label.innerHTML = "Labels: "
+  label.htmlFor = "labels";
+  var input = document.createElement('input');
+  input.name = 'labelsInput';
+  input.id = 'labelsInput';
+  document.getElementById('labelsNavBar').appendChild(label);
+  document.getElementById('labelsNavBar').appendChild(input);
+  }
+  else {
+    document.getElementById('labelsInput').style.display = 'none';
+
+  }*/
+}
 
 let mult = (array, factor) => array.map(x => x * factor);
 

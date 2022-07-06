@@ -35,6 +35,12 @@ body {
     font-size: 17px;
     cursor: pointer;
   }
+
+  .topnav input {
+    text-align: left;
+    width: 70%;
+    font-size: 17px;
+  }
   
   .sidenav {
     height: 100%;

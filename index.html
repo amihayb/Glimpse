@@ -21,12 +21,13 @@
 </head>
 
 <body>
-  <div class="topnav" margin-left="260px" padding="0px 10px">
+  <div class="topnav" id="topnav" margin-left="260px" padding="0px 10px">
     <a margin-left="260px" href="" title="Glimpse"><i class="fa fa-home"></i></a>
     <span><i class="fa fa-folder-open" title="Open File"></i>
       <input id="file-selector" type="file" />
     </span>
     <a onclick="export2csv()" title="Export to CSV"><i class="fa fa-save"></i></a>
+    <a onclick="addLabelsLine()" title="Add Labels Line"><i class="fa fa-tags"></i></a>
     <a onclick="cutToZoom()" title="Cut to Zoomed Area"><i class="fa fa-cut"></i></a>
     <a onclick="relativeTime()" title="Relative Time"><i class="fa fa-history"></i></a>
     <a onclick="markDataTips()" title="Data Tips"><i class="fa fa-map-marker"></i></a>
@@ -34,6 +35,12 @@
     <a href="#example" onclick="showExample()">Example File</a>
     <a onclick="alert('Hope I helped you understand your data.\nFor anything more, contact me:\nAmihay Blau\nmail: amihay@blau-eng.co.il\nPhone: +972-54-6668902');">by Amihay Blau</a>
   </div>
+
+  <div class="topnav" id="labelsNavBar" style="display: none;">
+    <a>Labels: </a>
+    <input name="labelsInput" id="labelsInput">
+  </div>
+
   <div class="sidenav" id="sidenav">
     <div id="xaxis_dropdown"></div>
     <div class="checkboxesPlace" id="checkboxesPlace"></div>
