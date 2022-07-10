@@ -171,6 +171,7 @@ function readFile(file) {
       };
       if (document.getElementById("labelsNavBar").style.display != "none") {
         headerObj = headerFromUser(headerObj);
+        return headerObj;
       }
 
       if (tLine.length != headerObj.header.length) { // No header
