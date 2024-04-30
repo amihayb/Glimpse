@@ -486,7 +486,34 @@ function cutToZoom() {
 }
 
 function relativeTime() {
-  rows["TIME"].map
+  
+  var Ts = prompt("Time Sample?", 0.001);
+  rows = addTimeVectorToExistingObject(rows, Ts);
+  addCheckbox("Time");
+
+  const selectElement = document.getElementById("x_axis");
+  const newOption = document.createElement("option");
+  newOption.value = "Time";
+  newOption.text = "Time";
+  selectElement.insertBefore(newOption, selectElement.firstChild);
+  
+  function addTimeVectorToExistingObject(existingObject, Ts) {
+    // Check if the existing object is valid
+    if (typeof existingObject !== 'object' || existingObject === null) {
+        throw new Error('Invalid existing object. Please provide a valid object.');
+    }
+
+    // Find the length of the first vector (assuming all vectors have the same length)
+    const firstVectorKey = Object.keys(existingObject)[0];
+    const vectorLength = existingObject[firstVectorKey].length;
+
+    // Generate the time vector with a sample rate of 0.01 seconds
+    const timeVector = Array.from({ length: vectorLength }, (_, i) => i * Ts);
+
+    // Create the modified object with the time vector as the first property
+    const modifiedObject = { Time: timeVector, ...existingObject };
+    return modifiedObject;
+}
 }
 
 function markDataTips() {
