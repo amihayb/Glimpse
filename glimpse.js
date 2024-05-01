@@ -487,7 +487,7 @@ function cutToZoom() {
 
 function relativeTime() {
   
-  var Ts = prompt("Time Sample?", 0.001);
+  var Ts = prompt("Time Sample?", 0.0001);
   rows = addTimeVectorToExistingObject(rows, Ts);
   addCheckbox("Time");
 
