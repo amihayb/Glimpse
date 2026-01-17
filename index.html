@@ -11,29 +11,35 @@
     gtag('config', 'G-L09DQY6L0Z');
   </script>
 
+  <title>Glimpse</title>
+  <!-- Open Graph / Social Media -->
+  <meta property="og:title" content="Glimpse – Visualize your data" />
+  <meta property="og:description" content="A web-based tool for analyzing signals metrics and data" />
+  <meta property="og:image" content="images/logo-title.png" />
+  <meta property="og:type" content="website" />
+
   <link href="StyleSheet.css" rel="stylesheet">
   <link rel="shortcut icon" href="images/glimpse.ico" />
   <link rel="icon" href="images/glimpse.ico" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="vendor/font-awesome.min.css">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="vendor/plotly-latest.min.js"></script>
 </head>
 
 <body>
-  <div class="topnav" id="topnav" margin-left="260px" padding="0px 10px">
-    <a margin-left="260px" href="" title="Glimpse"><i class="fa fa-home"></i></a>
+  <div class="topnav" id="topnav">
+    <a href="" title="Glimpse"><i class="fa fa-home"></i></a>
     <span><i class="fa fa-folder-open" title="Open File"></i>
       <input id="file-selector" type="file" />
     </span>
-    <a onclick="export2csv()" title="Export to CSV"><i class="fa fa-save"></i></a>
-    <a onclick="addLabelsLine()" title="Add Labels Line"><i class="fa fa-tags"></i></a>
-    <a onclick="cutToZoom()" title="Cut to Zoomed Area"><i class="fa fa-cut"></i></a>
-    <a onclick="relativeTime()" title="Relative Time"><i class="fa fa-history"></i></a>
-    <a onclick="markDataTips()" title="Data Tips"><i class="fa fa-map-marker"></i></a>
-    <a onclick="showStat()" title="Show Statistics"><i class="fa fa-list-ol"></i></a>
-    <a href="#example" onclick="showExample()">Example File</a>
-    <a onclick="alert('Hope I helped you understand your data.\nFor anything more, contact me:\nAmihay Blau\nmail: amihay@blau-eng.co.il\nPhone: +972-54-6668902');">by Amihay Blau</a>
+    <a onclick="Glimpse.actions.export2csv()" title="Export to CSV"><i class="fa fa-save"></i></a>
+    <a onclick="Glimpse.actions.addLabelsLine()" title="Add Labels Line"><i class="fa fa-tags"></i></a>
+    <a onclick="Glimpse.actions.cutToZoom()" title="Cut to Zoomed Area"><i class="fa fa-cut"></i></a>
+    <a onclick="Glimpse.actions.relativeTime()" title="Relative Time"><i class="fa fa-history"></i></a>
+    <a onclick="Glimpse.actions.markDataTips()" title="Data Tips"><i class="fa fa-map-marker"></i></a>
+    <a onclick="Glimpse.actions.showStat()" title="Show Statistics"><i class="fa fa-list-ol"></i></a>
+    <img src="images/logo-title.svg" alt="Glimpse logo" class="headImg" onclick="about()">
   </div>
 
   <div class="topnav" id="labelsNavBar" style="display: none;">
@@ -42,19 +48,25 @@
   </div>
 
   <div class="sidenav" id="sidenav">
+    <a href="#" class="button" id="exampleDataButton" onclick="Glimpse.actions.showExample()">Example Data</a>
     <div id="xaxis_dropdown"></div>
     <div class="checkboxesPlace" id="checkboxesPlace"></div>
   </div>
+  <div id="sidenav-resizer" aria-hidden="true"></div>
   <div id="explenation_text">
-    Glimpse – Visualize your data<br>
-      <br>
+    <h1 class="explenation-header">Glimpse – Visualize your data</h1>
     •	Load CSV or text files with your data in columns.<br>
     •	Mark checkboxes to show signals on upper or lower scope window.<br>
     •	You can change the X-Axis to any signal from the drop down menu.<br>
-    •	Right click on signal name to apply operations and play with it.<br>
+    •	Right click on signal name to apply operations and play with it.<br><br>
+    <button type="button" class="button" onclick="Glimpse.actions.showExample()">Example Data</button><br>
     <br>
     Good luck!<br>
-    Amihay Blau<br>
+    Amihay Blau<br><br>
+    Drag &amp; drop a CSV file here to load it.<br>
+    <div class="drop-indicator" aria-hidden="true">
+      <i class="fa fa-arrow-down"></i>
+    </div>
   </div>
   <div class="plot" id="plot">
   </div>
@@ -103,8 +115,15 @@
       </li>
     </ul>
   </nav>
-  <script src="glimpse.js"></script>
-  <script src="context.js"></script>
+  <script src="vendor/sweetalert2@11.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/dataTransforms.js"></script>
+  <script src="js/dataParser.js"></script>
+  <script src="js/plot.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/fileIO.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/contextMenu.js"></script>
 </body>
 
 </html>
