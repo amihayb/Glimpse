@@ -20,6 +20,35 @@
     };
   }
 
+  function getThemeLayout() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const paperBg  = isDark ? '#0e1520' : '#f7faff';
+    const plotBg   = isDark ? '#131d2e' : '#ffffff';
+    const fontColor = isDark ? '#c8d8f0' : '#344563';
+    const gridColor = isDark ? '#1e2d44' : '#e2e8f0';
+    const lineColor = isDark ? '#1e2d44' : '#c9d4e0';
+
+    const axisTheme = {
+      color: fontColor,
+      gridcolor: gridColor,
+      linecolor: lineColor,
+      tickcolor: lineColor,
+      zerolinecolor: lineColor
+    };
+
+    return {
+      paper_bgcolor: paperBg,
+      plot_bgcolor: plotBg,
+      font: { color: fontColor },
+      xaxis:  axisTheme,
+      yaxis:  axisTheme,
+      yaxis2: axisTheme,
+      yaxis3: axisTheme,
+      yaxis4: axisTheme,
+      legend: { bgcolor: paperBg, font: { color: fontColor } }
+    };
+  }
+
   function buildLayout(rowCount, options) {
     const grid = {
       rows: rowCount,
@@ -31,7 +60,8 @@
     }
     return {
       height: window.innerHeight - 80,
-      grid
+      grid,
+      ...getThemeLayout()
     };
   }
 
@@ -43,4 +73,5 @@
   plot.buildTrace = buildTrace;
   plot.buildLayout = buildLayout;
   plot.render = render;
+  plot.getThemeLayout = getThemeLayout;
 })();

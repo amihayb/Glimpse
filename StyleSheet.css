@@ -1,16 +1,52 @@
 :root {
-    --sidenav-width: 280px;
-    --explenation-offset: 300px;
-    --plot-offset: 260px;
-    --font-size-base: 20px;
-    --example-button-font-size: 25px;
-  }
+  --sidenav-width: 280px;
+  --explenation-offset: 300px;
+  --plot-offset: 260px;
+  --font-size-base: 20px;
+  --example-button-font-size: 25px;
+
+  --color-app-bg: #f7faff;
+  --color-panel-bg: #f7faff;
+  --color-nav-bg: #ebf0f8;
+  --color-text-primary: #344563;
+  --color-text-active: #202124;
+  --color-text-muted: #6c757d;
+  --color-btn-hover: #c9dbf9;
+  --color-border: #ccc;
+  --color-context-menu-bg: #fff;
+  --color-context-menu-border: #dfdfdf;
+  --color-context-menu-shadow: #cfcfcf;
+  --color-context-link: #0066aa;
+  --color-drop-indicator-border: #c9dbf9;
+  --color-drop-indicator-bg: rgba(201, 219, 249, 0.2);
+  --color-resizer: rgba(52, 69, 99, 0.25);
+}
+
+[data-theme="dark"] {
+  --color-app-bg: #0e1520;
+  --color-panel-bg: #131d2e;
+  --color-nav-bg: #1a2535;
+  --color-text-primary: #c8d8f0;
+  --color-text-active: #e0eeff;
+  --color-text-muted: #5c6e8a;
+  --color-btn-hover: #2c4168;
+  --color-border: #1e2d44;
+  --color-context-menu-bg: #131d2e;
+  --color-context-menu-border: #1e2d44;
+  --color-context-menu-shadow: #0e1520;
+  --color-context-link: #4a6fa5;
+  --color-drop-indicator-border: #1e2d44;
+  --color-drop-indicator-bg: rgba(30, 45, 68, 0.3);
+  --color-resizer: rgba(200, 216, 240, 0.2);
+}
 
   body {
     font-family: "Lato", sans-serif;
     margin: 0;
     padding-top: 65px;
     font-size: var(--font-size-base);
+    background-color: var(--color-app-bg);
+    color: var(--color-text-primary);
   }
 
   #file-selector {
@@ -33,10 +69,10 @@
     left: 0;
     top: 0;
     position: fixed;
-    background-color: #ebf0f8;
+    background-color: var(--color-nav-bg);
     display: flex;
     align-items: center;
-    color: #344563;
+    color: var(--color-text-primary);
     overflow: hidden;
     z-index: 10;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
@@ -44,7 +80,7 @@
   
   .topnav a , .topnav span , .topnav custom-file-upload{
     float: left;
-    color: #344563;
+    color: var(--color-text-primary);
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
@@ -68,15 +104,15 @@
   }
 
   .topnav a:hover, .topnav span:hover {
-    background-color: #c9dbf9;
-    color: #202124;
+    background-color: var(--color-btn-hover);
+    color: var(--color-text-active);
   }
 
   #explenation_text .button {
-    background-color: #ebf0f8;
-    color: #344563;
+    background-color: var(--color-nav-bg);
+    color: var(--color-text-primary);
     padding: 14px 16px;
-    border: 1px solid #c9dbf9;
+    border: 1px solid var(--color-btn-hover);
     border-radius: 12px;
     font-size: inherit;
     cursor: pointer;
@@ -84,8 +120,8 @@
   }
 
   #explenation_text .button:hover {
-    background-color: #c9dbf9;
-    color: #202124;
+    background-color: var(--color-btn-hover);
+    color: var(--color-text-active);
   }
 
   .topnav input {
@@ -111,8 +147,8 @@
     top: 65px;
     bottom: 0;
     left: 0;
-    color: #344563;
-    background-color: #f7faff;
+    color: var(--color-text-primary);
+    background-color: var(--color-panel-bg);
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
@@ -126,19 +162,19 @@
     padding: 6px 6px 6px 6px;
     text-decoration: none;
     font-size: 16px;
-    color: #344563;
+    color: var(--color-text-primary);
     display: block;
   }
   
   .sidenav a:hover {
-    background-color: #c9dbf9;
-    color: #202124;
+    background-color: var(--color-btn-hover);
+    color: var(--color-text-active);
   }
 
   .sidenav .button {
-    background-color: #f7faff;
+    background-color: var(--color-panel-bg);
     border: none;
-    color: #344563;
+    color: var(--color-text-primary);
     padding: 20px;
     text-align: left;
     text-decoration: none;
@@ -154,8 +190,8 @@
 
   .sidenav .button:hover,
   .sidenav .button.active {
-    background-color: #c9dbf9;
-    color: #202124;
+    background-color: var(--color-btn-hover);
+    color: var(--color-text-active);
   }
   .sidenav h1{
     text-align: center;
@@ -189,7 +225,7 @@
     margin-left: var(--explenation-offset); /* Same as the width of the sidenav */
     margin-top: 30px;
     font-size: inherit;
-    color: #344563;
+    color: var(--color-text-primary);
     padding: 0px 10px;
     line-height: 27px
   }
@@ -198,7 +234,7 @@
     font-size: 28px;
     font-weight: 600;
     margin: 0 0 12px;
-    color: #344563;
+    color: var(--color-text-primary);
   }
 
   .drop-indicator {
@@ -208,10 +244,10 @@
     width: 360px;
     height: 220px;
     margin: 24px auto 12px;
-    border: 4px dashed #c9dbf9;
+    border: 4px dashed var(--color-drop-indicator-border);
     border-radius: 22px;
-    color: #344563;
-    background-color: rgba(201, 219, 249, 0.2);
+    color: var(--color-text-primary);
+    background-color: var(--color-drop-indicator-bg);
     font-size: 72px;
     cursor: pointer;
     transition: background-color 0.2s ease, border-color 0.2s ease;
@@ -259,7 +295,7 @@
     height: 100%;
     width: 2px;
     margin: 0 auto;
-    background-color: rgba(52, 69, 99, 0.25);
+    background-color: var(--color-resizer);
   }
 
   body.labels-open #sidenav-resizer {
@@ -302,12 +338,12 @@
     left: 0;
     height: 25px;
     width: 25px;
-    background-color: #eee;
+    background-color: var(--color-border);
   }
   
   /* On mouse-over, add a grey background color */
   .container:hover input ~ .checkmark {
-    background-color: #ccc;
+    background-color: var(--color-btn-hover);
   }
   
   /* When the checkbox is checked, add a blue background */
@@ -346,9 +382,9 @@
     z-index: 10;
     padding: 12px 0;
     width: 240px;
-    background-color: #fff;
-    border: solid 1px #dfdfdf;
-    box-shadow: 1px 1px 2px #cfcfcf;
+    background-color: var(--color-context-menu-bg);
+    border: solid 1px var(--color-context-menu-border);
+    box-shadow: 1px 1px 2px var(--color-context-menu-shadow);
 }
 
 .context-menu--active {
@@ -373,11 +409,37 @@
 .context-menu__link {
     display: block;
     padding: 4px 12px;
-    color: #0066aa;
+    color: var(--color-context-link);
     text-decoration: none;
 }
 
 .context-menu__link:hover {
-    color: #fff;
-    background-color: #0066aa;
+    color: var(--color-text-active);
+    background-color: var(--color-context-link);
+}
+
+#theme-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-primary);
+  padding: 14px 16px;
+  font-size: inherit;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+#theme-toggle-btn:hover {
+  background-color: var(--color-btn-hover);
+  color: var(--color-text-active);
+}
+
+#theme-icon {
+  display: block;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+#theme-toggle-btn:active #theme-icon {
+  opacity: 0.6;
+  transform: rotate(30deg);
 }

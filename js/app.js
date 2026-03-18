@@ -1,3 +1,33 @@
+function updateThemeIcon(theme) {
+  const icon = document.getElementById('theme-icon');
+  if (!icon) return;
+  icon.className = theme === 'dark' ? 'fa fa-moon-o' : 'fa fa-sun-o';
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  if (isDark) {
+    html.removeAttribute('data-theme');
+    localStorage.setItem('glimpse-theme', 'light');
+    updateThemeIcon('light');
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    localStorage.setItem('glimpse-theme', 'dark');
+    updateThemeIcon('dark');
+  }
+  if (window.Glimpse && Glimpse.plot && Glimpse.plot.getThemeLayout) {
+    Plotly.relayout('plot', Glimpse.plot.getThemeLayout());
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  const savedTheme = localStorage.getItem('glimpse-theme') || 'dark';
+  updateThemeIcon(savedTheme);
+});
+
+window.toggleTheme = toggleTheme;
+
 (() => {
   const Glimpse = window.Glimpse || (window.Glimpse = {});
   Glimpse.state = {
