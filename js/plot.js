@@ -22,7 +22,7 @@
 
   function getThemeLayout() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const paperBg  = isDark ? '#0e1520' : '#f7faff';
+    const paperBg  = isDark ? '#0e1520' : '#ffffff';
     const plotBg   = isDark ? '#131d2e' : '#ffffff';
     const fontColor = isDark ? '#c8d8f0' : '#344563';
     const gridColor = isDark ? '#1e2d44' : '#e2e8f0';
