@@ -33,7 +33,10 @@ window.toggleTheme = toggleTheme;
   Glimpse.state = {
     rows: {},
     header: [],
-    fileName: null
+    fileName: null,
+    lastRenderHadSignals: false,
+    lastRenderHadTracesOnY1: false,
+    lastRenderHadTracesOnY2: false
   };
   Glimpse.actions = Glimpse.actions || {};
 
@@ -44,6 +47,7 @@ window.toggleTheme = toggleTheme;
 
     Glimpse.ui.cleanUp();
     Glimpse.ui.addDropdown(payload.header);
+    Glimpse.ui.addSignalSearchIfNeeded(payload.header.length);
     payload.header.forEach(Glimpse.ui.addCheckbox);
 
     if (Glimpse.data.isEcopiaHeader(payload.header)) {
@@ -67,6 +71,9 @@ window.toggleTheme = toggleTheme;
 
     const traces = signals.map(name => Glimpse.plot.buildTrace(name, 0, rows, xAxis));
     const layout = Glimpse.plot.buildLayout(1, { roworder: 'bottom to top' });
+    Glimpse.state.lastRenderHadSignals = traces.length > 0;
+    Glimpse.state.lastRenderHadTracesOnY1 = traces.length > 0;
+    Glimpse.state.lastRenderHadTracesOnY2 = false;
     Glimpse.plot.render(traces, layout);
   }
 
@@ -83,6 +90,7 @@ window.toggleTheme = toggleTheme;
 
     Glimpse.ui.cleanUp();
     Glimpse.ui.addDropdown(header);
+    Glimpse.ui.addSignalSearchIfNeeded(header.length);
     header.forEach(Glimpse.ui.addCheckbox);
 
     const traces = [
@@ -90,6 +98,9 @@ window.toggleTheme = toggleTheme;
       Glimpse.plot.buildTrace(header[2], 1, rows, "TIME")
     ];
     const layout = Glimpse.plot.buildLayout(1, { roworder: 'bottom to top' });
+    Glimpse.state.lastRenderHadSignals = true;
+    Glimpse.state.lastRenderHadTracesOnY1 = true;
+    Glimpse.state.lastRenderHadTracesOnY2 = false;
     Glimpse.plot.render(traces, layout);
     setExampleButtonVisible(false);
   }
@@ -117,6 +128,40 @@ window.toggleTheme = toggleTheme;
     });
 
     const layout = Glimpse.plot.buildLayout(2);
+
+    if (traces.length === 0) {
+      // No signals selected — reset zoom to autorange
+      layout.xaxis = { ...layout.xaxis, autorange: true };
+      layout.yaxis = { ...layout.yaxis, autorange: true };
+      layout.yaxis2 = { ...layout.yaxis2, autorange: true };
+    } else {
+      const gd = document.getElementById("plot");
+      const hadY1 = Glimpse.state.lastRenderHadTracesOnY1;
+      const hadY2 = Glimpse.state.lastRenderHadTracesOnY2;
+      const hasY1 = checkedBoxes.length > 0;
+      const hasY2 = checkedBoxes2.length > 0;
+
+      // X-axis: preserve when we had any signals before
+      if (Glimpse.state.lastRenderHadSignals && gd && gd.layout && gd.layout.xaxis && gd.layout.xaxis.range) {
+        layout.xaxis = { ...layout.xaxis, range: gd.layout.xaxis.range };
+      }
+
+      // Y-axes: preserve only when that subplot had traces before; first signal in subplot → autorange
+      if (hasY1 && hadY1 && gd && gd.layout && gd.layout.yaxis && gd.layout.yaxis.range) {
+        layout.yaxis = { ...layout.yaxis, range: gd.layout.yaxis.range };
+      } else if (hasY1) {
+        layout.yaxis = { ...layout.yaxis, autorange: true };
+      }
+      if (hasY2 && hadY2 && gd && gd.layout && gd.layout.yaxis2 && gd.layout.yaxis2.range) {
+        layout.yaxis2 = { ...layout.yaxis2, range: gd.layout.yaxis2.range };
+      } else if (hasY2) {
+        layout.yaxis2 = { ...layout.yaxis2, autorange: true };
+      }
+    }
+
+    Glimpse.state.lastRenderHadSignals = traces.length > 0;
+    Glimpse.state.lastRenderHadTracesOnY1 = checkedBoxes.length > 0;
+    Glimpse.state.lastRenderHadTracesOnY2 = checkedBoxes2.length > 0;
     Glimpse.plot.render(traces, layout);
   }
 
@@ -314,23 +359,40 @@ window.toggleTheme = toggleTheme;
   }
 
   function markDataTips() {
-    const myPlot = document.getElementById('plot');
-    myPlot.on('plotly_click', function (data) {
+    const fontSize = Glimpse.config.dataTipsFontSize ?? 12;
+    const myPlot = document.getElementById("plot");
+    myPlot.on("plotly_click", function (data) {
       for (let i = 0; i < data.points.length; i++) {
-        const annotateText = 'x = ' + data.points[i].x +
-          ', y = ' + data.points[i].y.toPrecision(4);
+        const annotateText = "x = " + data.points[i].x +
+          ", y = " + data.points[i].y.toPrecision(4);
         const annotation = {
           text: annotateText,
           x: data.points[i].x,
           y: parseFloat(data.points[i].y.toPrecision(4)),
           xref: data.points[0].xaxis._id,
-          yref: data.points[0].yaxis._id
+          yref: data.points[0].yaxis._id,
+          font: { size: fontSize }
         };
         const annotations = myPlot.layout.annotations || [];
         annotations.push(annotation);
-        Plotly.relayout('plot', { annotations: annotations });
+        Plotly.relayout("plot", { annotations: annotations });
       }
     });
+  }
+
+  function setDataTipsFontSize() {
+    const defaultSize = Glimpse.config.dataTipsFontSize ?? 12;
+    const sizeInput = prompt("Data tips font size (px):", defaultSize);
+    if (sizeInput == null || sizeInput === "") return;
+    const fontSize = Math.max(8, Math.min(72, parseInt(sizeInput, 10) || defaultSize));
+    Glimpse.config.dataTipsFontSize = fontSize;
+
+    const gd = document.getElementById("plot");
+    const annotations = gd?.layout?.annotations;
+    if (annotations && annotations.length > 0) {
+      const updated = annotations.map((a) => ({ ...a, font: { ...a.font, size: fontSize } }));
+      Plotly.relayout("plot", { annotations: updated });
+    }
   }
 
   function export2csv() {
@@ -420,6 +482,16 @@ window.toggleTheme = toggleTheme;
     setExampleButtonVisible(true);
     initSidenavResizer();
     initDropIndicator();
+    initDataTipsContextMenu();
+  }
+
+  function initDataTipsContextMenu() {
+    const btn = document.getElementById("dataTipsBtn");
+    if (!btn) return;
+    btn.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      setDataTipsFontSize();
+    });
   }
 
   Glimpse.actions.handleDataLoaded = handleDataLoaded;
@@ -431,6 +503,7 @@ window.toggleTheme = toggleTheme;
   Glimpse.actions.cutToZoom = cutToZoom;
   Glimpse.actions.relativeTime = relativeTime;
   Glimpse.actions.markDataTips = markDataTips;
+  Glimpse.actions.setDataTipsFontSize = setDataTipsFontSize;
   Glimpse.actions.export2csv = export2csv;
   Glimpse.actions.addLabelsLine = addLabelsLine;
 

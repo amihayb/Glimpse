@@ -2,6 +2,7 @@
   window.Glimpse = window.Glimpse || {};
   window.Glimpse.config = {
     defaultSampleTime: 0.01,
+    dataTipsFontSize: 12,
     maxHeaderScanLines: 50,
     defaultHeader: [
       "TIME",
