@@ -1,33 +1,3 @@
-function updateThemeIcon(theme) {
-  const icon = document.getElementById('theme-icon');
-  if (!icon) return;
-  icon.className = theme === 'dark' ? 'fa fa-moon-o' : 'fa fa-sun-o';
-}
-
-function toggleTheme() {
-  const html = document.documentElement;
-  const isDark = html.getAttribute('data-theme') === 'dark';
-  if (isDark) {
-    html.removeAttribute('data-theme');
-    localStorage.setItem('glimpse-theme', 'light');
-    updateThemeIcon('light');
-  } else {
-    html.setAttribute('data-theme', 'dark');
-    localStorage.setItem('glimpse-theme', 'dark');
-    updateThemeIcon('dark');
-  }
-  if (window.Glimpse && Glimpse.plot && Glimpse.plot.getThemeLayout) {
-    Plotly.relayout('plot', Glimpse.plot.getThemeLayout());
-  }
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  const savedTheme = localStorage.getItem('glimpse-theme') || 'dark';
-  updateThemeIcon(savedTheme);
-});
-
-window.toggleTheme = toggleTheme;
-
 (() => {
   const Glimpse = window.Glimpse || (window.Glimpse = {});
   Glimpse.state = {
@@ -36,7 +6,10 @@ window.toggleTheme = toggleTheme;
     fileName: null,
     lastRenderHadSignals: false,
     lastRenderHadTracesOnY1: false,
-    lastRenderHadTracesOnY2: false
+    lastRenderHadTracesOnY2: false,
+    gridRows: 2,
+    gridCols: 1,
+    gridPattern: "coupled"
   };
   Glimpse.actions = Glimpse.actions || {};
 
@@ -44,6 +17,9 @@ window.toggleTheme = toggleTheme;
     Glimpse.state.rows = payload.rows;
     Glimpse.state.header = payload.header;
     Glimpse.state.fileName = payload.fileName || null;
+
+    const plotEl = document.getElementById("plot");
+    if (plotEl) plotEl.classList.remove("plot-hidden");
 
     Glimpse.ui.cleanUp();
     Glimpse.ui.addDropdown(payload.header);
@@ -69,8 +45,8 @@ window.toggleTheme = toggleTheme;
       signals = header.filter(name => name !== xAxis).slice(0, 2);
     }
 
-    const traces = signals.map(name => Glimpse.plot.buildTrace(name, 0, rows, xAxis));
-    const layout = Glimpse.plot.buildLayout(1, { roworder: 'bottom to top' });
+    const traces = signals.map(name => Glimpse.plot.buildTrace(name, 1, rows, xAxis));
+    const layout = Glimpse.plot.buildLayout(1, 1, { roworder: "bottom to top" });
     Glimpse.state.lastRenderHadSignals = traces.length > 0;
     Glimpse.state.lastRenderHadTracesOnY1 = traces.length > 0;
     Glimpse.state.lastRenderHadTracesOnY2 = false;
@@ -78,6 +54,9 @@ window.toggleTheme = toggleTheme;
   }
 
   function showExample() {
+    const plotEl = document.getElementById("plot");
+    if (plotEl) plotEl.classList.remove("plot-hidden");
+
     const header = ["TIME", "Sine", "Cosine", "Random"];
     const rows = Glimpse.data.defineObj(header);
     rows["TIME"] = Plotly.d3.range(0.1, 10, 0.1);
@@ -97,7 +76,7 @@ window.toggleTheme = toggleTheme;
       Glimpse.plot.buildTrace(header[1], 1, rows, "TIME"),
       Glimpse.plot.buildTrace(header[2], 1, rows, "TIME")
     ];
-    const layout = Glimpse.plot.buildLayout(1, { roworder: 'bottom to top' });
+    const layout = Glimpse.plot.buildLayout(1, 1, { roworder: "bottom to top" });
     Glimpse.state.lastRenderHadSignals = true;
     Glimpse.state.lastRenderHadTracesOnY1 = true;
     Glimpse.state.lastRenderHadTracesOnY2 = false;
@@ -113,55 +92,82 @@ window.toggleTheme = toggleTheme;
     button.style.display = isVisible ? "" : "none";
   }
 
+  /** Maps checkbox slot (1..N, top-left to right to bottom) to Plotly subplot index (bottom-to-top). */
+  function visualSlotToPlotlyIndex(slot, rows, cols) {
+    const visRow = Math.floor((slot - 1) / cols) + 1;
+    const visCol = ((slot - 1) % cols) + 1;
+    return (rows - visRow) * cols + visCol;
+  }
+
+  /** For coupled: y-axis index = row. For independent: y-axis index = subplot index. */
+  function plotlyIndexToYAxisIndex(plotlyIndex, r, c) {
+    const pattern = Glimpse.state.gridPattern || "coupled";
+    if (pattern === "coupled") {
+      return Math.floor((plotlyIndex - 1) / c) + 1;
+    }
+    return plotlyIndex;
+  }
+
   function selectSignals() {
-    const checkedBoxes = Glimpse.ui.getCheckedBoxes("signalCheckbox");
-    const checkedBoxes2 = Glimpse.ui.getCheckedBoxes("signalCheckbox2");
     const rows = Glimpse.state.rows;
     const xAxis = Glimpse.ui.getXAxisName();
+    const r = Glimpse.state.gridRows || 2;
+    const c = Glimpse.state.gridCols || 1;
+    const pattern = Glimpse.state.gridPattern || "coupled";
+    const subplotCount = r * c;
+    const yAxisCount = pattern === "coupled" ? r : subplotCount;
+    const xAxisCount = pattern === "coupled" ? c : subplotCount;
 
     const traces = [];
-    checkedBoxes.forEach(box => {
-      traces.push(Glimpse.plot.buildTrace(box.id, 1, rows, xAxis));
-    });
-    checkedBoxes2.forEach(box => {
-      traces.push(Glimpse.plot.buildTrace(box.id, 2, rows, xAxis));
-    });
+    const hadTraces = {};
+    const hasTraces = {};
 
-    const layout = Glimpse.plot.buildLayout(2);
+    for (let slot = 1; slot <= subplotCount; slot++) {
+      const plotlyIndex = visualSlotToPlotlyIndex(slot, r, c);
+      const yAxisIdx = plotlyIndexToYAxisIndex(plotlyIndex, r, c);
+      const chkName = "signalCheckbox" + (slot === 1 ? "" : slot);
+      const checked = Glimpse.ui.getCheckedBoxes(chkName);
+      hadTraces[yAxisIdx] = Glimpse.state["lastRenderHadTracesOnY" + yAxisIdx];
+      hasTraces[yAxisIdx] = hasTraces[yAxisIdx] || checked.length > 0;
+      checked.forEach(box => {
+        traces.push(Glimpse.plot.buildTrace(box.id, plotlyIndex, rows, xAxis));
+      });
+    }
+
+    const layout = Glimpse.plot.buildLayout(r, c);
 
     if (traces.length === 0) {
-      // No signals selected — reset zoom to autorange
-      layout.xaxis = { ...layout.xaxis, autorange: true };
-      layout.yaxis = { ...layout.yaxis, autorange: true };
-      layout.yaxis2 = { ...layout.yaxis2, autorange: true };
+      for (let i = 1; i <= xAxisCount; i++) {
+        const xKey = "xaxis" + (i === 1 ? "" : i);
+        if (layout[xKey]) layout[xKey] = { ...layout[xKey], autorange: true };
+      }
+      for (let i = 1; i <= yAxisCount; i++) {
+        const yKey = "yaxis" + (i === 1 ? "" : i);
+        if (layout[yKey]) layout[yKey] = { ...layout[yKey], autorange: true };
+      }
     } else {
       const gd = document.getElementById("plot");
-      const hadY1 = Glimpse.state.lastRenderHadTracesOnY1;
-      const hadY2 = Glimpse.state.lastRenderHadTracesOnY2;
-      const hasY1 = checkedBoxes.length > 0;
-      const hasY2 = checkedBoxes2.length > 0;
-
-      // X-axis: preserve when we had any signals before
       if (Glimpse.state.lastRenderHadSignals && gd && gd.layout && gd.layout.xaxis && gd.layout.xaxis.range) {
         layout.xaxis = { ...layout.xaxis, range: gd.layout.xaxis.range };
       }
-
-      // Y-axes: preserve only when that subplot had traces before; first signal in subplot → autorange
-      if (hasY1 && hadY1 && gd && gd.layout && gd.layout.yaxis && gd.layout.yaxis.range) {
-        layout.yaxis = { ...layout.yaxis, range: gd.layout.yaxis.range };
-      } else if (hasY1) {
-        layout.yaxis = { ...layout.yaxis, autorange: true };
-      }
-      if (hasY2 && hadY2 && gd && gd.layout && gd.layout.yaxis2 && gd.layout.yaxis2.range) {
-        layout.yaxis2 = { ...layout.yaxis2, range: gd.layout.yaxis2.range };
-      } else if (hasY2) {
-        layout.yaxis2 = { ...layout.yaxis2, autorange: true };
+      for (let i = 1; i <= yAxisCount; i++) {
+        const yKey = "yaxis" + (i === 1 ? "" : i);
+        const had = hadTraces[i];
+        const has = hasTraces[i];
+        if (layout[yKey]) {
+          if (has && had && gd && gd.layout && gd.layout[yKey] && gd.layout[yKey].range) {
+            layout[yKey] = { ...layout[yKey], range: gd.layout[yKey].range };
+          } else if (has) {
+            layout[yKey] = { ...layout[yKey], autorange: true };
+          }
+        }
       }
     }
 
     Glimpse.state.lastRenderHadSignals = traces.length > 0;
-    Glimpse.state.lastRenderHadTracesOnY1 = checkedBoxes.length > 0;
-    Glimpse.state.lastRenderHadTracesOnY2 = checkedBoxes2.length > 0;
+    for (let i = 1; i <= yAxisCount; i++) {
+      Glimpse.state["lastRenderHadTracesOnY" + i] = hasTraces[i];
+    }
     Glimpse.plot.render(traces, layout);
   }
 
@@ -248,7 +254,7 @@ window.toggleTheme = toggleTheme;
   }
 
   function showStat() {
-    const gd = document.getElementById('plot');
+    const gd = document.getElementById("plot");
     const xRange = gd.layout.xaxis.range;
     let yRange;
     try {
@@ -260,7 +266,7 @@ window.toggleTheme = toggleTheme;
     const xAxis = Glimpse.ui.getXAxisName();
 
     let xIdx = [];
-    if (typeof rows[xAxis][2] === 'string') {
+    if (typeof rows[xAxis][2] === "string") {
       xIdx[0] = rows[xAxis][Math.floor(xRange[0])];
       xIdx[1] = rows[xAxis][Math.floor(xRange[1])];
     } else {
@@ -299,26 +305,26 @@ window.toggleTheme = toggleTheme;
     alert(niceStr(stat));
 
     function niceStr(stat) {
-      let str = '';
+      let str = "";
       for (let i = 0; i < stat.Mean.length; i++) {
-        str += stat.Name[i] + ': \n';
-        str += 'Min: ' + stat.Min[i].toFixed(3) + '\n';
-        str += 'Max: ' + stat.Max[i].toFixed(3) + '\n';
-        str += 'Mean: ' + stat.Mean[i].toFixed(3) + '\n';
-        str += 'STD: ' + stat.STD[i].toFixed(3) + '\n\n';
+        str += stat.Name[i] + ": \n";
+        str += "Min: " + stat.Min[i].toFixed(3) + "\n";
+        str += "Max: " + stat.Max[i].toFixed(3) + "\n";
+        str += "Mean: " + stat.Mean[i].toFixed(3) + "\n";
+        str += "STD: " + stat.STD[i].toFixed(3) + "\n\n";
       }
       return str;
     }
   }
 
   function cutToZoom() {
-    const gd = document.getElementById('plot');
+    const gd = document.getElementById("plot");
     const xRange = gd.layout.xaxis.range;
     const xAxis = Glimpse.ui.getXAxisName();
     const rows = Glimpse.state.rows;
 
     let idx = [];
-    if (typeof rows[xAxis][2] !== 'string') {
+    if (typeof rows[xAxis][2] !== "string") {
       idx[0] = rows[xAxis].findIndex((val) => val > xRange[0]);
       idx[1] = rows[xAxis].findIndex((val) => val > xRange[1]);
     } else {
@@ -348,8 +354,8 @@ window.toggleTheme = toggleTheme;
     }
 
     function addTimeVectorToExistingObject(existingObject, sampleTime) {
-      if (typeof existingObject !== 'object' || existingObject === null) {
-        throw new Error('Invalid existing object. Please provide a valid object.');
+      if (typeof existingObject !== "object" || existingObject === null) {
+        throw new Error("Invalid existing object. Please provide a valid object.");
       }
       const firstVectorKey = Object.keys(existingObject)[0];
       const vectorLength = existingObject[firstVectorKey].length;
@@ -396,7 +402,7 @@ window.toggleTheme = toggleTheme;
   }
 
   function export2csv() {
-    Glimpse.data.exportToCsv('download.csv', Glimpse.state.rows);
+    Glimpse.data.exportToCsv("download.csv", Glimpse.state.rows);
   }
 
   function addLabelsLine() {
@@ -406,21 +412,21 @@ window.toggleTheme = toggleTheme;
     }
 
     if (labelsNavBar.style.display === "none") {
-      labelsNavBar.style.display = 'flex';
+      labelsNavBar.style.display = "flex";
       document.body.classList.add("labels-open");
 
       const signalLabels = localStorage["SignalLabels"];
       if (signalLabels !== undefined) {
         document.getElementById("labelsInput").value = signalLabels;
       }
-      document.getElementById("labelsInput").addEventListener('input', updateValue);
+      document.getElementById("labelsInput").addEventListener("input", updateValue);
     } else {
-      labelsNavBar.style.display = 'none';
+      labelsNavBar.style.display = "none";
       document.body.classList.remove("labels-open");
     }
 
     function updateValue() {
-      localStorage.setItem('SignalLabels', document.getElementById("labelsInput").value);
+      localStorage.setItem("SignalLabels", document.getElementById("labelsInput").value);
     }
   }
 
@@ -472,6 +478,124 @@ window.toggleTheme = toggleTheme;
     });
   }
 
+  function initGridDropdown() {
+    const trigger = document.getElementById("grid-dropdown-trigger");
+    const panel = document.getElementById("grid-dropdown-panel");
+    const label = document.getElementById("grid-dropdown-label");
+    const cellsEl = document.getElementById("grid-dropdown-cells");
+    if (!trigger || !panel || !cellsEl) return;
+
+    const GRID_SIZE = 4;
+    for (let row = 1; row <= GRID_SIZE; row++) {
+      for (let col = 1; col <= GRID_SIZE; col++) {
+        const cell = document.createElement("div");
+        cell.className = "grid-dropdown-cell";
+        cell.dataset.row = row;
+        cell.dataset.col = col;
+        cell.setAttribute("role", "gridcell");
+        cellsEl.appendChild(cell);
+      }
+    }
+
+    const cells = cellsEl.querySelectorAll(".grid-dropdown-cell");
+
+    function highlightSelection(hoverRow, hoverCol) {
+      cells.forEach((cell) => {
+        const r = parseInt(cell.dataset.row, 10);
+        const c = parseInt(cell.dataset.col, 10);
+        const inSelection = r <= hoverRow && c <= hoverCol;
+        cell.classList.toggle("in-selection", inSelection);
+        cell.classList.toggle("selected", r === hoverRow && c === hoverCol);
+      });
+      if (label) label.textContent = hoverRow + "×" + hoverCol;
+    }
+
+    function clearHighlight() {
+      const r = Glimpse.state.gridRows || 2;
+      const c = Glimpse.state.gridCols || 1;
+      highlightSelection(r, c);
+    }
+
+    cells.forEach((cell) => {
+      cell.addEventListener("mouseenter", () => {
+        highlightSelection(parseInt(cell.dataset.row, 10), parseInt(cell.dataset.col, 10));
+      });
+      cell.addEventListener("click", (e) => {
+        e.preventDefault();
+        const rows = parseInt(cell.dataset.row, 10);
+        const cols = parseInt(cell.dataset.col, 10);
+        Glimpse.actions.setSubplotGrid(rows, cols);
+        panel.setAttribute("aria-hidden", "true");
+        trigger.setAttribute("aria-expanded", "false");
+      });
+    });
+
+    cellsEl.addEventListener("mouseleave", clearHighlight);
+
+    function positionPanel() {
+      const rect = trigger.getBoundingClientRect();
+      panel.style.top = (rect.bottom + 4) + "px";
+      panel.style.left = rect.left + "px";
+    }
+
+    trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = panel.getAttribute("aria-hidden") === "false";
+      if (!isOpen) {
+        positionPanel();
+      }
+      panel.setAttribute("aria-hidden", String(isOpen));
+      trigger.setAttribute("aria-expanded", String(!isOpen));
+      if (!isOpen) clearHighlight();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!panel.contains(e.target) && !trigger.contains(e.target)) {
+        panel.setAttribute("aria-hidden", "true");
+        trigger.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
+  function setSubplotGrid(rows, cols) {
+    Glimpse.state.gridRows = rows;
+    Glimpse.state.gridCols = cols;
+
+    const label = document.getElementById("grid-dropdown-label");
+    if (label) label.textContent = rows + "×" + cols;
+
+    if (Glimpse.ui && Glimpse.ui.refreshCheckboxesForGrid && Glimpse.state.header && Glimpse.state.header.length > 0) {
+      Glimpse.ui.refreshCheckboxesForGrid();
+    }
+    if (Glimpse.actions && Glimpse.actions.selectSignals) {
+      Glimpse.actions.selectSignals();
+    }
+  }
+
+  function setPattern(pattern) {
+    Glimpse.state.gridPattern = pattern;
+    const icon = document.getElementById("pattern-toggle-icon");
+    const btn = document.getElementById("pattern-toggle");
+    if (icon) icon.className = pattern === "coupled" ? "fa fa-link" : "fa fa-unlink";
+    if (btn) {
+      btn.setAttribute("title", pattern === "coupled" ? "Link X axis" : "Unlink X axis");
+    }
+    if (Glimpse.actions && Glimpse.actions.selectSignals) {
+      Glimpse.actions.selectSignals();
+    }
+  }
+
+  function initPatternToggle() {
+    const btn = document.getElementById("pattern-toggle");
+    if (!btn) return;
+    const pattern = Glimpse.state.gridPattern || "coupled";
+    setPattern(pattern);
+    btn.addEventListener("click", () => {
+      const current = Glimpse.state.gridPattern || "coupled";
+      setPattern(current === "coupled" ? "independent" : "coupled");
+    });
+  }
+
   function init() {
     if (Glimpse.io && Glimpse.io.attachFileSelector) {
       Glimpse.io.attachFileSelector();
@@ -483,6 +607,8 @@ window.toggleTheme = toggleTheme;
     initSidenavResizer();
     initDropIndicator();
     initDataTipsContextMenu();
+    initPatternToggle();
+    initGridDropdown();
   }
 
   function initDataTipsContextMenu() {
@@ -497,6 +623,7 @@ window.toggleTheme = toggleTheme;
   Glimpse.actions.handleDataLoaded = handleDataLoaded;
   Glimpse.actions.showExample = showExample;
   Glimpse.actions.selectSignals = selectSignals;
+  Glimpse.actions.setSubplotGrid = setSubplotGrid;
   Glimpse.actions.menuItemExecute = menuItemExecute;
   Glimpse.actions.renameVar = renameVar;
   Glimpse.actions.showStat = showStat;
@@ -507,7 +634,7 @@ window.toggleTheme = toggleTheme;
   Glimpse.actions.export2csv = export2csv;
   Glimpse.actions.addLabelsLine = addLabelsLine;
 
-  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener("DOMContentLoaded", init);
 
   window.about = function () {
     Swal.fire({

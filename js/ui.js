@@ -36,42 +36,49 @@
     }
   }
 
+  function getSubplotCount() {
+    const r = (Glimpse.state && Glimpse.state.gridRows) || 2;
+    const c = (Glimpse.state && Glimpse.state.gridCols) || 1;
+    return r * c;
+  }
+
   function addCheckbox(colName) {
-    const cont = document.createElement('container');
+    const cont = document.createElement("container");
     cont.className = "container1";
     cont.id = colName;
-    const checkbox = document.createElement('input');
-    checkbox.type = "checkbox";
-    checkbox.id = colName;
-    checkbox.name = "signalCheckbox";
-    checkbox.onclick = () => {
-      if (Glimpse.actions && Glimpse.actions.selectSignals) {
-        Glimpse.actions.selectSignals();
-      }
-    };
+    const subplotCount = getSubplotCount();
 
-    const checkbox2 = document.createElement('input');
-    checkbox2.type = "checkbox";
-    checkbox2.id = colName;
-    checkbox2.name = "signalCheckbox2";
-    checkbox2.onclick = () => {
-      if (Glimpse.actions && Glimpse.actions.selectSignals) {
-        Glimpse.actions.selectSignals();
-      }
-    };
+    for (let i = 1; i <= subplotCount; i++) {
+      const chk = document.createElement("input");
+      chk.type = "checkbox";
+      chk.id = colName;
+      chk.name = "signalCheckbox" + (i === 1 ? "" : i);
+      chk.onclick = () => {
+        if (Glimpse.actions && Glimpse.actions.selectSignals) {
+          Glimpse.actions.selectSignals();
+        }
+      };
+      cont.appendChild(chk);
+    }
 
-    const br = document.createElement('br');
-    br.onclick = "console.log(\"click\")";
+    const br = document.createElement("br");
 
     const element = document.getElementById("checkboxesPlace");
     if (!element) {
       return;
     }
     element.appendChild(cont);
-    cont.appendChild(checkbox);
-    cont.appendChild(checkbox2);
     cont.appendChild(document.createTextNode(colName));
     cont.appendChild(br);
+  }
+
+  function refreshCheckboxesForGrid() {
+    const header = (Glimpse.state && Glimpse.state.header) || [];
+    const containers = document.getElementsByClassName("container1");
+    for (let i = containers.length - 1; i >= 0; i--) {
+      containers[i].remove();
+    }
+    header.forEach(addCheckbox);
   }
 
   function addSignalSearchIfNeeded(numSignals) {
@@ -135,4 +142,5 @@
   ui.addSignalSearchIfNeeded = addSignalSearchIfNeeded;
   ui.cleanUp = cleanUp;
   ui.getXAxisName = getXAxisName;
+  ui.refreshCheckboxesForGrid = refreshCheckboxesForGrid;
 })();

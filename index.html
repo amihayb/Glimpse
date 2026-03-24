@@ -12,6 +12,14 @@
   </script>
 
   <title>Glimpse</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ebf0f8">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Glimpse">
+
   <!-- Open Graph / Social Media -->
   <meta property="og:title" content="Glimpse – Visualize your data" />
   <meta property="og:description" content="A web-based tool for visualizing and analyzing signals, metrics, and data" />
@@ -26,9 +34,14 @@
       var theme = localStorage.getItem('glimpse-theme') || 'dark';
       if (theme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
       }
     })();
   </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="StyleSheet.css" rel="stylesheet">
   <link rel="shortcut icon" href="images/glimpse.ico" />
   <link rel="icon" href="images/glimpse.ico" />
@@ -53,7 +66,22 @@
     <a onclick="Glimpse.actions.relativeTime()" title="Relative Time"><i class="fa fa-history"></i></a>
     <a id="dataTipsBtn" onclick="Glimpse.actions.markDataTips()" title="Data Tips (right-click to change size)"><i class="fa fa-map-marker"></i></a>
     <a onclick="Glimpse.actions.showStat()" title="Show Statistics"><i class="fa fa-list-ol"></i></a>
-    <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle dark/light mode"><i class="fa fa-moon-o" id="theme-icon"></i></button>
+    <button type="button" class="pattern-toggle" id="pattern-toggle" title="Link X axis" aria-label="Toggle subplot pattern">
+      <i class="fa fa-link" id="pattern-toggle-icon"></i>
+    </button>
+    <div class="grid-dropdown-wrapper">
+      <button type="button" class="grid-dropdown-trigger" id="grid-dropdown-trigger" title="Subplot Grid" aria-label="Subplot grid" aria-haspopup="true" aria-expanded="false">
+        <i class="fa fa-th"></i>
+        <i class="fa fa-caret-down grid-chevron"></i>
+      </button>
+      <div class="grid-dropdown-panel" id="grid-dropdown-panel" role="menu" aria-hidden="true">
+        <span class="grid-dropdown-label" id="grid-dropdown-label">2×1</span>
+        <div class="grid-dropdown-cells" id="grid-dropdown-cells" role="grid"></div>
+      </div>
+    </div>
+    <button type="button" class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle theme" title="Toggle theme">
+      <i class="fa fa-moon-o" id="theme-icon"></i>
+    </button>
     <img src="images/logo-title.svg" alt="Glimpse logo" class="headImg" onclick="about()">
   </div>
 
@@ -83,7 +111,7 @@
       <i class="fa fa-arrow-down"></i>
     </div>
   </div>
-  <div class="plot" id="plot">
+  <div class="plot plot-hidden" id="plot">
   </div>
   <nav id="context-menu" class="context-menu">
     <ul class="context-menu__items">
@@ -139,6 +167,15 @@
   <script src="js/fileIO.js"></script>
   <script src="js/app.js"></script>
   <script src="js/contextMenu.js"></script>
+  <script src="js/theme.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("./sw.js")
+          .catch(function (err) { console.warn("Service worker registration failed:", err); });
+      });
+    }
+  </script>
 </body>
 
 </html>

@@ -20,6 +20,14 @@
   --color-drop-indicator-border: #c9dbf9;
   --color-drop-indicator-bg: rgba(201, 219, 249, 0.2);
   --color-resizer: rgba(52, 69, 99, 0.25);
+
+  /* Aliases for plot.js / grid UI (mapped to Glimpse tokens) */
+  --color-bg: var(--color-app-bg);
+  --color-surface: var(--color-panel-bg);
+  --color-text-secondary: var(--color-text-muted);
+  --color-primary: var(--color-context-link);
+  --color-primary-alpha: rgba(0, 102, 170, 0.12);
+  --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 [data-theme="dark"] {
@@ -38,6 +46,8 @@
   --color-drop-indicator-border: #1e2d44;
   --color-drop-indicator-bg: rgba(30, 45, 68, 0.3);
   --color-resizer: rgba(200, 216, 240, 0.2);
+  --color-primary-alpha: rgba(74, 111, 165, 0.22);
+  --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.45);
 }
 
   body {
@@ -235,6 +245,17 @@
     font-size: 16px;
   }
 
+  .container1 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 6px;
+  }
+
+  .container1 input[type="checkbox"] {
+    flex-shrink: 0;
+  }
+
   .checkboxesPlace {
     flex: 1 1 auto;
     min-height: 0;
@@ -280,9 +301,14 @@
   }
   
   .plot {
-    margin-left: var(--plot-offset); /* Same as the width of the sidenav */
-    font-size: 28px; /* Increased text to enable scrolling */
+    margin-left: var(--plot-offset);
+    font-size: 28px;
     padding: 0px 0px;
+    background-color: var(--color-bg);
+  }
+
+  .plot-hidden {
+    display: none !important;
   }
 
   body.labels-open {
@@ -439,20 +465,134 @@
     background-color: var(--color-context-link);
 }
 
-#theme-toggle-btn {
+.topnav .pattern-toggle,
+.topnav .grid-dropdown-wrapper .grid-dropdown-trigger {
+  flex-shrink: 0;
+}
+
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.theme-toggle:hover {
+  background-color: var(--color-btn-hover);
+  color: var(--color-text-active);
+}
+
+.pattern-toggle {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  padding: 10px 14px;
+  font-size: 18px;
+  border-radius: 12px;
+  margin-right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+}
+
+.pattern-toggle:hover {
+  background-color: var(--color-btn-hover);
+  color: var(--color-text-active);
+}
+
+.grid-dropdown-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.grid-dropdown-trigger {
   background: none;
   border: none;
   color: var(--color-text-primary);
-  padding: 14px 16px;
-  font-size: inherit;
   cursor: pointer;
+  padding: 10px 14px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   border-radius: 12px;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 
-#theme-toggle-btn:hover {
+.grid-dropdown-trigger:hover {
   background-color: var(--color-btn-hover);
   color: var(--color-text-active);
+}
+
+.grid-chevron {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.grid-dropdown-panel {
+  display: none;
+  position: fixed;
+  margin-top: 4px;
+  padding: 12px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-elevated);
+  z-index: 1000;
+  min-width: 200px;
+}
+
+.grid-dropdown-panel[aria-hidden="false"] {
+  display: block;
+}
+
+.grid-dropdown-label {
+  display: block;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 10px;
+}
+
+.grid-dropdown-cells {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 2px;
+  width: 108px;
+  height: 108px;
+}
+
+.grid-dropdown-cell {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  cursor: pointer;
+  background-color: transparent;
+  transition: border-color 0.1s, background-color 0.1s;
+}
+
+.grid-dropdown-cell:hover,
+.grid-dropdown-cell.selected {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-alpha);
+}
+
+.grid-dropdown-cell.in-selection {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-alpha);
 }
 
 #theme-icon {
@@ -460,7 +600,7 @@
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
-#theme-toggle-btn:active #theme-icon {
+.theme-toggle:active #theme-icon {
   opacity: 0.6;
   transform: rotate(30deg);
 }
