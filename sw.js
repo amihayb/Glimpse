@@ -23,6 +23,7 @@ const APP_SHELL = [
   "./js/app.js",
   "./js/contextMenu.js",
   "./js/theme.js",
+  "./js/views.js",
   "./images/logo-title.svg"
 ];
 

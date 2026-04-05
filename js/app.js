@@ -9,7 +9,8 @@
     lastRenderHadTracesOnY2: false,
     gridRows: 2,
     gridCols: 1,
-    gridPattern: "coupled"
+    gridPattern: "coupled",
+    operationsLog: []
   };
   Glimpse.actions = Glimpse.actions || {};
 
@@ -17,6 +18,7 @@
     Glimpse.state.rows = payload.rows;
     Glimpse.state.header = payload.header;
     Glimpse.state.fileName = payload.fileName || null;
+    Glimpse.state.operationsLog = [];
 
     const plotEl = document.getElementById("plot");
     if (plotEl) plotEl.classList.remove("plot-hidden");
@@ -192,40 +194,48 @@
           const newVarName = Glimpse.data.strClean(caller + "_x_" + factor);
           rows[newVarName] = Glimpse.data.transforms.mult(rows[caller], factor);
           Glimpse.ui.addCheckbox(newVarName);
+          Glimpse.state.operationsLog.push({ type: "Mult", source: caller, result: newVarName, params: { factor: Number(factor) } });
         }
         break;
       }
       case "Diff":
         rows[caller + "_diff"] = Glimpse.data.transforms.diff(rows[caller]);
         Glimpse.ui.addCheckbox(caller + "_diff");
+        Glimpse.state.operationsLog.push({ type: "Diff", source: caller, result: caller + "_diff", params: {} });
         break;
       case "Integrate":
         rows[caller + "_int"] = Glimpse.data.transforms.integrate(rows[caller]);
         Glimpse.ui.addCheckbox(caller + "_int");
+        Glimpse.state.operationsLog.push({ type: "Integrate", source: caller, result: caller + "_int", params: {} });
         break;
       case "filter": {
         const filterW = prompt("LPF Cutoff Frequency? [Hz] ", 5);
         if (filterW !== null) {
           rows[caller + "_filter"] = Glimpse.data.transforms.filter(rows[caller], filterW);
           Glimpse.ui.addCheckbox(caller + "_filter");
+          Glimpse.state.operationsLog.push({ type: "filter", source: caller, result: caller + "_filter", params: { cutoff: Number(filterW) } });
         }
         break;
       }
       case "Detrend":
         rows[caller + "_detrend"] = Glimpse.data.transforms.detrend(rows[caller]);
         Glimpse.ui.addCheckbox(caller + "_detrend");
+        Glimpse.state.operationsLog.push({ type: "Detrend", source: caller, result: caller + "_detrend", params: {} });
         break;
       case "removeFirst":
         rows[caller + "_rem1"] = Glimpse.data.transforms.removeFirst(rows[caller]);
         Glimpse.ui.addCheckbox(caller + "_rem1");
+        Glimpse.state.operationsLog.push({ type: "removeFirst", source: caller, result: caller + "_rem1", params: {} });
         break;
       case "removeMean":
         rows[caller + "_remMean"] = Glimpse.data.transforms.removeMean(rows[caller]);
         Glimpse.ui.addCheckbox(caller + "_remMean");
+        Glimpse.state.operationsLog.push({ type: "removeMean", source: caller, result: caller + "_remMean", params: {} });
         break;
       case "fixAngle":
         rows[caller + "_angFix"] = Glimpse.data.transforms.fixAngle(rows[caller]);
         Glimpse.ui.addCheckbox(caller + "_angFix");
+        Glimpse.state.operationsLog.push({ type: "fixAngle", source: caller, result: caller + "_angFix", params: {} });
         break;
       case "showStat":
         showStat();
@@ -624,6 +634,7 @@
   Glimpse.actions.showExample = showExample;
   Glimpse.actions.selectSignals = selectSignals;
   Glimpse.actions.setSubplotGrid = setSubplotGrid;
+  Glimpse.actions.setPattern = setPattern;
   Glimpse.actions.menuItemExecute = menuItemExecute;
   Glimpse.actions.renameVar = renameVar;
   Glimpse.actions.showStat = showStat;
